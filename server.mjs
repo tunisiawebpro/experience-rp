@@ -2,8 +2,6 @@ import http from 'node:http';
 import crypto from 'node:crypto';
 import { URL } from 'node:url';
 
-process.loadEnvFile?.();
-
 const port = process.env.PORT || 3002;
 
 const websiteUrl = 'https://exp-rp.netlify.app/';
