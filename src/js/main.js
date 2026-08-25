@@ -105,7 +105,7 @@ document.addEventListener('keydown', (event) => {
 const discordLoginBtn = document.getElementById('discordLoginBtn');
 const discordAccountMenu = document.getElementById('discordAccountMenu');
 const discordSignOut = document.getElementById('discordSignOut');
-const discordAuthUrl = 'http://127.0.0.1:3002/auth/discord';
+const discordAuthUrl = 'https://exp-rp-backend.onrender.com/auth/discord';
 const discordProfileStorageKey = 'experience-rp-discord-profile';
 
 discordLoginBtn?.addEventListener('click', (event) => {
