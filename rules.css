@@ -1,0 +1,920 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+
+    overflow-x: hidden;
+
+    font-family: "Inter", sans-serif;
+
+    color: #ffffff;
+
+    background: #050607;
+}
+
+
+/* =====================================================
+   BACKGROUND
+===================================================== */
+
+.background {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: -10;
+
+    background-image: url("/ex.png");
+
+    background-size: cover;
+
+    background-position: center center;
+
+    background-repeat: no-repeat;
+
+    opacity: 1;
+
+    filter:
+        brightness(0.88)
+        saturate(0.95)
+        contrast(1.05);
+
+    transform: scale(1.02);
+}
+
+
+/* =====================================================
+   DARK OVERLAY
+===================================================== */
+
+.dark-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: -9;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.38) 0%,
+            rgba(0, 0, 0, 0.08) 35%,
+            rgba(0, 0, 0, 0.08) 65%,
+            rgba(0, 0, 0, 0.42) 100%
+        ),
+
+        linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.20) 0%,
+            rgba(0, 0, 0, 0.08) 50%,
+            rgba(0, 0, 0, 0.48) 100%
+        );
+
+    box-shadow:
+        inset 0 0 120px rgba(0, 0, 0, 0.45);
+}
+
+
+/* =====================================================
+   STARS
+===================================================== */
+
+.stars {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: -8;
+
+    pointer-events: none;
+
+    opacity: 0.65;
+
+    background-image:
+
+        radial-gradient(
+            circle,
+            rgba(245, 200, 55, 0.95) 1px,
+            transparent 1.8px
+        ),
+
+        radial-gradient(
+            circle,
+            rgba(255, 215, 65, 0.80) 1px,
+            transparent 1.8px
+        ),
+
+        radial-gradient(
+            circle,
+            rgba(255, 225, 100, 0.75) 1px,
+            transparent 1.8px
+        ),
+
+        radial-gradient(
+            circle,
+            rgba(245, 190, 30, 0.70) 1px,
+            transparent 1.8px
+        );
+
+    background-size:
+        270px 230px,
+        430px 350px,
+        620px 500px,
+        760px 420px;
+
+    background-position:
+        20px 30px,
+        130px 100px,
+        350px 60px,
+        500px 150px;
+}
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+main {
+    position: relative;
+
+    z-index: 5;
+
+    width: 100%;
+
+    min-height: 100vh;
+
+    padding:
+        136px
+        20px
+        80px;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.rules-header {
+    width: 100%;
+
+    max-width: 828px;
+
+    height: 116px;
+
+    margin: 0 auto 15px;
+
+    padding: 20px 24px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    border-radius: 17px;
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(22, 25, 27, 0.96),
+            rgba(9, 11, 12, 0.94)
+        );
+
+    backdrop-filter: blur(14px);
+
+    -webkit-backdrop-filter: blur(14px);
+
+    box-shadow:
+        0 20px 55px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+
+/* =====================================================
+   HEADER LOGO
+===================================================== */
+
+.header-logo {
+    width: 69px;
+
+    height: 69px;
+
+    flex-shrink: 0;
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffe52b,
+            #ffc900
+        );
+
+    box-shadow:
+        0 0 0 1px rgba(255, 215, 45, 0.30),
+        0 0 30px rgba(255, 198, 0, 0.14);
+}
+
+.header-logo img {
+    width: 100%;
+
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}
+
+
+/* =====================================================
+   HEADER TEXT
+===================================================== */
+
+.header-text {
+    min-width: 0;
+}
+
+.header-text h1 {
+    color: #f5ce5c;
+
+    font-size: 31px;
+
+    line-height: 1.1;
+
+    font-weight: 800;
+
+    letter-spacing: -1.2px;
+}
+
+.header-text p {
+    margin-top: 6px;
+
+    color: #9b9ea2;
+
+    font-size: 12px;
+
+    font-weight: 500;
+}
+
+.rules-home-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-left: auto;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid rgba(255, 215, 45, 0.42);
+    border-radius: 0.55rem;
+    color: #f5ce5c;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.rules-home-button:hover {
+    border-color: #ffd72d;
+    background: rgba(255, 215, 45, 0.12);
+    transform: translateY(-2px);
+}
+
+
+/* =====================================================
+   RULES GRID
+===================================================== */
+
+.rules-grid {
+    width: 100%;
+
+    max-width: 828px;
+
+    margin: 0 auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 15px;
+}
+
+
+/* =====================================================
+   RULE CARD
+===================================================== */
+
+.rule-card {
+    position: relative;
+
+    height: 247px;
+
+    overflow: hidden;
+
+    cursor: pointer;
+
+    border-radius: 16px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.09);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(19, 22, 23, 0.96),
+            rgba(8, 10, 11, 0.94)
+        );
+
+    backdrop-filter: blur(12px);
+
+    -webkit-backdrop-filter: blur(12px);
+
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.018);
+
+    transition:
+        transform 0.28s ease,
+        border-color 0.28s ease,
+        box-shadow 0.28s ease;
+}
+
+
+/* =====================================================
+   CARD TOP LINE
+===================================================== */
+
+.rule-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    left: 20%;
+
+    right: 20%;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 210, 40, 0.65),
+            transparent
+        );
+
+    opacity: 0.35;
+}
+
+
+/* =====================================================
+   CARD HOVER
+===================================================== */
+
+.rule-card:hover {
+    transform: translateY(-4px);
+
+    border-color:
+        rgba(255, 210, 40, 0.68);
+
+    box-shadow:
+        0 20px 45px rgba(0, 0, 0, 0.52),
+        0 0 30px rgba(255, 200, 30, 0.08);
+}
+
+
+/* =====================================================
+   NORMAL CARD CONTENT
+===================================================== */
+
+.card-content {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 2;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    opacity: 1;
+
+    transition:
+        opacity 0.20s ease;
+}
+
+
+/* =====================================================
+   RULE NUMBER
+===================================================== */
+
+.rule-number {
+    width: 47px;
+
+    height: 47px;
+
+    margin-bottom: 15px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    color: #151515;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffe67b,
+            #ffc82a
+        );
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    box-shadow:
+        0 7px 23px rgba(255, 192, 25, 0.18);
+
+    transition:
+        transform 0.25s ease;
+}
+
+.rule-card:hover .rule-number {
+    transform: scale(1.03);
+}
+
+
+/* =====================================================
+   RULE TITLE
+===================================================== */
+
+.rule-card h2 {
+    color: #e8ca62;
+
+    font-size: 17px;
+
+    line-height: 1.25;
+
+    font-weight: 700;
+
+    text-align: center;
+}
+
+
+/* =====================================================
+   DEFINITION
+===================================================== */
+
+.rule-definition {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 3;
+
+    padding: 28px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(19, 22, 23, 0.99),
+            rgba(8, 10, 11, 0.99)
+        );
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transform: translateY(12px);
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease,
+        transform 0.25s ease;
+}
+
+
+/* =====================================================
+   SHOW DEFINITION ON HOVER
+===================================================== */
+
+.rule-card:hover .rule-definition {
+    opacity: 1;
+
+    visibility: visible;
+
+    transform: translateY(0);
+}
+
+
+/* =====================================================
+   HIDE NORMAL CONTENT ON HOVER
+===================================================== */
+
+.rule-card:hover .card-content {
+    opacity: 0;
+}
+
+
+/* =====================================================
+   DEFINITION LABEL
+===================================================== */
+
+.rule-definition span {
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: #dfb83f;
+
+    font-size: 9px;
+
+    line-height: 1;
+
+    font-weight: 800;
+
+    letter-spacing: 5px;
+}
+
+
+/* =====================================================
+   DEFINITION TITLE
+===================================================== */
+
+.rule-definition h3 {
+    margin-bottom: 11px;
+
+    color: #f3ca4d;
+
+    font-size: 18px;
+
+    line-height: 1.2;
+
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   DEFINITION TEXT
+===================================================== */
+
+.rule-definition p {
+    max-width: 245px;
+
+    color: #b3b6b9;
+
+    font-size: 13px;
+
+    line-height: 1.85;
+
+    font-weight: 400;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 950px) {
+
+    main {
+        padding-top: 40px;
+    }
+
+    .rules-header,
+    .rules-grid {
+        max-width: 700px;
+    }
+
+    .rules-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .header-text h1 {
+        font-size: 27px;
+    }
+
+    .rule-card {
+        height: 230px;
+    }
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+    main {
+        padding:
+            20px
+            12px
+            50px;
+    }
+
+    .rules-header {
+        height: auto;
+
+        min-height: 100px;
+
+        padding: 16px;
+
+        gap: 13px;
+
+        border-radius: 15px;
+    }
+
+    .header-logo {
+        width: 56px;
+
+        height: 56px;
+
+        border-radius: 12px;
+    }
+
+    .header-text h1 {
+        font-size: 21px;
+
+        letter-spacing: -0.7px;
+    }
+
+    .header-text p {
+        margin-top: 5px;
+
+        font-size: 10px;
+    }
+
+    .rules-home-button span { display: none; }
+    .rules-home-button { padding: 0.75rem; }
+
+    .rules-grid {
+        grid-template-columns: 1fr;
+
+        gap: 12px;
+    }
+
+    .rule-card {
+        height: 220px;
+
+        border-radius: 15px;
+    }
+
+    .rule-definition {
+        padding: 24px;
+    }
+
+    .rule-definition p {
+        font-size: 12px;
+    }
+}
+/* =====================================================
+   FEW GOLDEN STARS
+===================================================== */
+
+.stars {
+    position: fixed;
+    inset: 0;
+
+    z-index: -8;
+
+    pointer-events: none;
+
+    opacity: 0.65;
+
+    background-image:
+        radial-gradient(
+            circle,
+            rgba(245, 200, 55, 0.95) 1px,
+            transparent 1.8px
+        ),
+        radial-gradient(
+            circle,
+            rgba(255, 215, 70, 0.85) 1px,
+            transparent 1.8px
+        ),
+        radial-gradient(
+            circle,
+            rgba(255, 225, 100, 0.75) 1px,
+            transparent 1.8px
+        );
+
+    /* المسافات كبيرة = stars أقل */
+    background-size:
+        520px 430px,
+        700px 580px,
+        900px 700px;
+
+    background-position:
+        80px 40px,
+        300px 180px,
+        600px 100px;
+}
+/* =========================================
+   STARS
+========================================= */
+
+.stars {
+    position: fixed;
+    inset: 0;
+
+    z-index: -8;
+
+    pointer-events: none;
+
+    opacity: 0.8;
+}
+
+/* النجوم */
+
+.stars::before {
+    content: "";
+
+    position: absolute;
+
+    top: 7%;
+    left: 8%;
+
+    width: 2px;
+    height: 2px;
+
+    background: #f5c842;
+
+    border-radius: 50%;
+
+    box-shadow:
+        130px 45px 0 #dcae25,
+        260px 10px 0 #f5c842,
+        390px 80px 0 #e6b82d,
+        520px 25px 0 #f5c842,
+        650px 110px 0 #dcae25,
+        790px 40px 0 #f5c842,
+        920px 95px 0 #e6b82d,
+        1060px 20px 0 #f5c842,
+        1180px 125px 0 #dcae25,
+        1320px 55px 0 #f5c842,
+        1450px 150px 0 #e6b82d,
+        1550px 35px 0 #f5c842,
+
+        80px 230px 0 #dcae25,
+        310px 190px 0 #f5c842,
+        570px 260px 0 #e6b82d,
+        830px 210px 0 #f5c842,
+        1080px 280px 0 #dcae25,
+        1370px 230px 0 #f5c842,
+
+        180px 430px 0 #e6b82d,
+        470px 390px 0 #f5c842,
+        760px 460px 0 #dcae25,
+        1030px 410px 0 #f5c842,
+        1290px 480px 0 #e6b82d,
+        1510px 390px 0 #f5c842,
+
+        100px 650px 0 #f5c842,
+        350px 700px 0 #dcae25,
+        620px 620px 0 #f5c842,
+        900px 690px 0 #e6b82d,
+        1160px 640px 0 #f5c842,
+        1430px 720px 0 #dcae25,
+
+        250px 820px 0 #f5c842,
+        540px 780px 0 #e6b82d,
+        820px 850px 0 #f5c842,
+        1110px 800px 0 #dcae25,
+        1390px 860px 0 #f5c842;
+
+    box-shadow:
+        130px 45px 2px rgba(245, 200, 66, 0.20),
+        390px 80px 2px rgba(245, 200, 66, 0.15),
+        790px 40px 2px rgba(245, 200, 66, 0.18),
+        1180px 125px 2px rgba(245, 200, 66, 0.15),
+        470px 390px 2px rgba(245, 200, 66, 0.18),
+        900px 690px 2px rgba(245, 200, 66, 0.15);
+}
+
+
+/* نجوم صغيرة إضافية */
+
+.stars::after {
+    content: "";
+
+    position: absolute;
+
+    top: 15%;
+    left: 15%;
+
+    width: 1px;
+    height: 1px;
+
+    background: #e8bd35;
+
+    border-radius: 50%;
+
+    box-shadow:
+        230px 30px 0 #e8bd35,
+        510px 100px 0 #f5c842,
+        880px 20px 0 #e8bd35,
+        1140px 170px 0 #f5c842,
+        1400px 70px 0 #e8bd35,
+
+        120px 350px 0 #f5c842,
+        430px 300px 0 #e8bd35,
+        700px 350px 0 #f5c842,
+        1010px 330px 0 #e8bd35,
+        1250px 380px 0 #f5c842,
+
+        300px 560px 0 #e8bd35,
+        580px 520px 0 #f5c842,
+        850px 570px 0 #e8bd35,
+        1080px 530px 0 #f5c842,
+        1350px 600px 0 #e8bd35;
+}
+
+/* =====================================================
+   FLOATING BACKGROUND POINTS
+===================================================== */
+
+.floating-points {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.floating-point {
+    position: absolute;
+    bottom: -12px;
+    display: block;
+    border-radius: 50%;
+    background: #ffe27a;
+    box-shadow: 0 0 8px rgba(255, 226, 122, 0.9), 0 0 18px rgba(255, 196, 30, 0.42);
+    opacity: 0;
+    animation:
+        point-rise var(--point-duration) ease-in-out var(--point-delay) infinite;
+}
+
+@keyframes point-rise {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(0.7);
+    }
+
+    12% {
+        opacity: var(--point-opacity);
+    }
+
+    78% {
+        opacity: var(--point-opacity);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--point-drift), -110vh, 0) scale(1.15);
+    }
+}
+
