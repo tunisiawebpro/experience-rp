@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Experience RP - Strict Roleplay</title>
+    
+    <!-- Tailwind CSS -->
+    <link href="/css/style.css" rel="stylesheet" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@300;400;600;700;800;900&family=Special+Elite&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/publics/images/logoex.png">
+
+</head>
+<body>
+
+<!-- ============================================ -->
+<!-- ENTRANCE / LOADING SCREEN -->
+<!-- ============================================ -->
+<div id="entranceScreen" class="fixed inset-0 z-[9999] bg-black flex items-center justify-center flex-col p-6">
+    <div class="max-w-2xl text-center space-y-8">
+        <div class="space-y-4">
+            <p class="entrance-reveal entrance-delay-1 entrance-heading text-white text-lg md:text-xl font-light uppercase tracking-[0.3em]">Welcome to</p>
+            <h1 class="entrance-reveal entrance-delay-2 entrance-title text-4xl md:text-6xl font-black text-white">Experience RP</h1>
+            <p id="entranceParagraph" class="entrance-reveal entrance-delay-3 entrance-typewriter text-white text-lg md:text-2xl leading-relaxed max-w-2xl mx-auto" aria-live="polite"></p>
+            <p class="entrance-reveal entrance-delay-4 text-white text-xs uppercase tracking-wider">Enter at your own risk.</p>
+        </div>
+        <div class="entrance-reveal entrance-delay-5 pt-4">
+            <p class="text-white text-sm animate-pulse">
+                Press <span class="font-bold">ENTER</span> to continue
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- MAIN WEBSITE -->
+<!-- ============================================ -->
+<div id="mainWebsite" class="hidden min-h-screen bg-black text-white font-sans">
+
+    <a id="discordLoginBtn" class="discord-login" href="#" aria-label="Login with Discord">
+        <i class="fab fa-discord" aria-hidden="true"></i>
+        <span>Login with Discord</span>
+        <i class="fas fa-arrow-up-right-from-square discord-login-arrow" aria-hidden="true"></i>
+    </a>
+    <div id="discordAccountMenu" class="discord-account-menu" hidden>
+        <div class="discord-account-menu-label"><span></span> Discord account</div>
+        <button id="discordSignOut" type="button"><i class="fas fa-right-from-bracket" aria-hidden="true"></i> Sign out</button>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- NAVIGATION (Left Sidebar) -->
+    <!-- ============================================ -->
+    <nav id="navbar" class="fixed left-0 top-0 h-full w-64 bg-black/95 backdrop-blur-lg border-r border-[#FFD700]/20 transition-all duration-300 z-50 -translate-x-full md:translate-x-0 overflow-y-auto">
+        <div class="p-6 border-b border-[#FFD700]/20">
+            <div class="flex items-center gap-3">
+                <img src="logodis.png" alt="Experience RP logo" class="w-12 h-12 rounded-xl object-cover border border-[#FFD700]/50 shadow-lg shadow-[#FFD700]/10" />
+                <div>
+                    <span class="text-white font-bold text-lg block">Experience RP</span>
+                    <span class="text-[#FFD700] text-xs uppercase tracking-wider">Strict Roleplay</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="p-4 space-y-1">
+            <a href="#home" class="nav-link active">
+                <i class="fas fa-home w-5 text-center text-[#FFD700]"></i>
+                <span>Home</span>
+            </a>
+            <a href="rules.html" class="nav-link">
+                <i class="fas fa-gavel w-5 text-center text-[#FFD700]"></i>
+                <span>Rules</span>
+            </a>
+            <a href="storyline.html" class="nav-link">
+                <i class="fas fa-book-open w-5 text-center text-[#FFD700]"></i>
+                <span>Storyline</span>
+            </a>
+        </nav>
+        
+        <!-- Collapse Button -->
+        <div class="absolute bottom-4 left-0 w-full px-4">
+            <button id="collapseBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-white">
+                <i class="fas fa-chevron-left"></i>
+                <span class="text-sm">Collapse</span>
+            </button>
+        </div>
+    </nav>
+
+    <button id="showNavBtn" class="hidden fixed top-4 left-4 z-50 p-3 rounded-xl bg-black/80 backdrop-blur-lg border border-[#FFD700]/20 hover:border-[#FFD700]/50 transition-colors" aria-label="Show navigation">
+        <i class="fas fa-chevron-right text-[#FFD700]"></i>
+    </button>
+
+    <!-- Mobile Hamburger Menu Button -->
+    <button id="menuBtn" class="fixed top-4 left-4 z-50 p-3 rounded-xl bg-black/80 backdrop-blur-lg border border-[#FFD700]/20 hover:border-[#FFD700]/50 transition-colors md:hidden">
+        <i class="fas fa-bars text-xl text-[#FFD700]"></i>
+    </button>
+
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================ -->
+    <main class="md:ml-64 transition-all duration-300">
+
+        <!-- ============================================ -->
+        <!-- HOME / HERO SECTION -->
+        <!-- ============================================ -->
+        <section id="home" class="min-h-screen relative overflow-hidden">
+            <!-- Video Background -->
+            <div class="absolute inset-0 z-0 overflow-hidden">
+                <video id="bgVideo" class="w-full h-full object-cover opacity-40" loop muted playsinline autoplay>
+                    <source src="/exp.mp4" type="video/mp4" />
+                </video>
+                <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-black/85"></div>
+            </div>
+
+            <!-- Hero Content -->
+            <div class="relative z-10 flex flex-col justify-center min-h-screen px-6 md:px-12 max-w-6xl mx-auto">
+                <div class="space-y-6">
+                    <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-[#FFD700]/30 bg-[#FFD700]/10">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FFD700] opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-[#FFD700]"></span>
+                        </span>
+                        <span class="text-[#FFD700] text-sm font-medium uppercase tracking-wider">Live Now</span>
+                    </div>
+
+                    <h1 class="text-5xl md:text-7xl font-black leading-tight">
+                        <span class="text-white">Experience</span>
+                        <span class="text-[#FFD700]">RP</span>
+                    </h1>
+
+                    <p class="text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed font-light tracking-wide">
+                        Where every decision shapes your destiny. 
+                        <span class="text-[#FFD700] font-semibold">Strict Roleplay.</span> 
+                        Maximum immersion.
+                    </p>
+
+                    <div class="flex flex-wrap gap-4">
+                        <a href="fivem://connect/89.42.88.45:30120" class="group px-10 py-4 rounded-xl bg-gradient-to-r from-[#FFD700] to-[#FFA500] hover:scale-105 transition-all duration-300 font-bold text-black flex items-center gap-3 shadow-lg shadow-[#FFD700]/25">
+                            <i class="fas fa-plug"></i>
+                            Connect Now
+                            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                        <a href="storyline.html" class="px-8 py-4 rounded-xl border border-[#FFD700]/40 hover:border-[#FFD700] hover:bg-[#FFD700]/10 transition-all duration-300 font-semibold text-white flex items-center gap-2">
+                            <i class="fas fa-book-open text-[#FFD700]"></i>
+                            Discover the Story
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server Status Bar at Bottom of Hero -->
+            <div class="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-md border-t border-[#FFD700]/20">
+                <div class="max-w-6xl mx-auto px-6 md:px-12 py-4 flex flex-col md:flex-row items-center justify-between gap-3">
+                    <div class="flex items-center gap-6 text-sm">
+                        <div class="flex items-center gap-2 text-gray-400">
+                            <i class="fas fa-server text-[#FFD700]"></i>
+                            <span class="font-mono text-xs">IP: <span class="text-white">play.experiencerp.com</span></span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-400">
+                            <i class="fab fa-discord text-[#FFD700]"></i>
+                            <span>Discord Members: <span id="discordMemberCount" class="text-white font-bold">--</span></span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-400">
+                            <span class="relative flex h-2 w-2">
+                                <span id="serverStatusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                                <span id="serverStatusDot" class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                            <span id="serverStatusText" class="text-green-500 text-xs uppercase tracking-wider">Checking...</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-gray-500 text-xs uppercase tracking-wider">Status</span>
+                        <span id="serverStatusBadge" class="px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-bold">
+                            <i id="serverStatusIcon" class="fas fa-circle-notch fa-spin mr-1"></i> <span id="serverStatusLabel">Checking...</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================ -->
+<!-- DIVIDER 1 - CITY TICKER -->
+<!-- ============================================ -->
+<div class="ticker-divider" aria-label="A living city, real stories, your chapter, Experience RP">
+    <div class="ticker-band">
+        <div class="ticker-content"><span>A LIVING CITY. &nbsp; / &nbsp; REAL STORIES. &nbsp; / &nbsp; YOUR CHAPTER. &nbsp; / &nbsp; EXPERIENCE RP &nbsp; / &nbsp; NO TWO STORIES ARE THE SAME. &nbsp; / &nbsp;</span><span aria-hidden="true">A LIVING CITY. &nbsp; / &nbsp; REAL STORIES. &nbsp; / &nbsp; YOUR CHAPTER. &nbsp; / &nbsp; EXPERIENCE RP &nbsp; / &nbsp; NO TWO STORIES ARE THE SAME. &nbsp; / &nbsp;</span></div>
+    </div>
+</div>
+
+        <!-- ============================================ -->
+<!-- FEATURES SECTION - HOLOGRAPHIC PODS -->
+<!-- ============================================ -->
+<section id="features" class="home-section home-reveal-section py-24 px-6 md:px-12 max-w-7xl mx-auto relative">
+    
+    <!-- Section Background Effect -->
+    <div class="absolute inset-0 -z-10">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#FFD700] opacity-[0.02] rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="home-section-heading text-center mb-16">
+        <span class="text-[#FFD700] text-xs font-bold uppercase tracking-[0.3em] bg-[#FFD700]/10 px-4 py-2 rounded-full border border-[#FFD700]/20">
+            ⚡ Why Choose Us
+        </span>
+        <h2 class="text-4xl md:text-5xl font-black text-white mt-6">
+            Server <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FFD700] to-[#FFA500]">Features</span>
+        </h2>
+        <div class="w-24 h-1 mx-auto bg-gradient-to-r from-transparent via-[#FFD700] to-transparent mt-4"></div>
+        <p class="text-gray-400 mt-4 max-w-2xl mx-auto text-sm">
+            Experience the most immersive roleplay environment ever created
+        </p>
+    </div>
+
+    <div class="home-reveal-grid feature-list">
+        
+        <!-- Feature 1 -->
+        <div class="holo-pod group" data-delay="0">
+            <div class="holo-pod-glow"></div>
+            <div class="holo-pod-content">
+                <div class="holo-icon">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Strict RP</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">100% strict roleplay environment with realistic interactions and consequences.</p>
+                <div class="holo-stats">
+                    <span class="holo-stat">⚡ 24/7</span>
+                    <span class="holo-stat">🎯 100%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="holo-pod group" data-delay="200">
+            <div class="holo-pod-glow"></div>
+            <div class="holo-pod-content">
+                <div class="holo-icon">
+                    <i class="fas fa-users-gear"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Active Staff</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Dedicated staff team available 24/7 to ensure a smooth experience.</p>
+                <div class="holo-stats">
+                    <span class="holo-stat">👥 15+</span>
+                    <span class="holo-stat">🌟 Experienced</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="holo-pod group" data-delay="300">
+            <div class="holo-pod-glow"></div>
+            <div class="holo-pod-content">
+                <div class="holo-icon">
+                    <i class="fas fa-handcuffs"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Justice System</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Full legal system with courts, lawyers, and realistic law enforcement.</p>
+                <div class="holo-stats">
+                    <span class="holo-stat">⚖️ Realistic</span>
+                    <span class="holo-stat">📜 Legal</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="holo-pod group" data-delay="400">
+            <div class="holo-pod-glow"></div>
+            <div class="holo-pod-content">
+                <div class="holo-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Player Businesses</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Own and manage businesses, from nightclubs to mechanic shops.</p>
+                <div class="holo-stats">
+                    <span class="holo-stat">🏪 20+</span>
+                    <span class="holo-stat">💰 Profitable</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="holo-pod group" data-delay="500">
+            <div class="holo-pod-glow"></div>
+            <div class="holo-pod-content">
+                <div class="holo-icon">
+                    <i class="fas fa-rotate"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Realistic Economy</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Dynamic economy system that responds to player actions and events.</p>
+                <div class="holo-stats">
+                    <span class="holo-stat">📊 Dynamic</span>
+                    <span class="holo-stat">🌍 Global</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+        <!-- ============================================ -->
+        <!-- DIVIDER 2 - SIGNAL LINE -->
+        <!-- ============================================ -->
+        <div class="signal-divider" aria-hidden="true">
+            <span class="signal-line"></span>
+            <span class="signal-core"></span>
+            <span class="signal-line signal-line-reverse"></span>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- HOW TO JOIN SECTION -->
+        <!-- ============================================ -->
+        <section id="how-to-join" class="home-section home-reveal-section join-section py-24 px-6 md:px-12 max-w-7xl mx-auto">
+            <div class="home-section-heading join-heading">
+                <div>
+                    <span class="text-[#FFD700] text-xs font-bold uppercase tracking-[0.3em]">Your entry point</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-white mt-3">Enter the <span class="text-[#FFD700]">city</span></h2>
+                </div>
+                <p class="join-intro">Three clear steps stand between you and your first story in Los Santos.</p>
+            </div>
+
+            <div class="home-reveal-grid join-track">
+                <article class="join-card group">
+                    <div class="join-card-top">
+                        <span class="join-step">01</span>
+                        <span class="join-status">Start here</span>
+                    </div>
+                    <div class="join-icon"><i class="fas fa-download"></i></div>
+                    <div class="join-card-body">
+                        <h3>Download FiveM</h3>
+                        <p>Install the FiveM client and prepare your system for a seamless connection.</p>
+                    </div>
+                    <div class="join-card-foot"><span>Client setup</span><i class="fas fa-arrow-right"></i></div>
+                </article>
+
+                <article class="join-card group">
+                    <div class="join-card-top">
+                        <span class="join-step">02</span>
+                        <span class="join-status">Get approved</span>
+                    </div>
+                    <div class="join-icon"><i class="fas fa-key"></i></div>
+                    <div class="join-card-body">
+                        <h3>Interview</h3>
+                        <p>Tell us who you are and wait for our staff to approve your place in the city.</p>
+                    </div>
+                    <div class="join-card-foot"><span>Community access</span><i class="fas fa-arrow-right"></i></div>
+                </article>
+
+                <article class="join-card join-card-final group">
+                    <div class="join-card-top">
+                        <span class="join-step">03</span>
+                        <span class="join-status">You are ready</span>
+                    </div>
+                    <div class="join-icon"><i class="fas fa-plug"></i></div>
+                    <div class="join-card-body">
+                        <h3>Connect &amp; Play</h3>
+                        <p>Enter our server address, choose your path, and begin an unforgettable story.</p>
+                    </div>
+                    <div class="join-card-foot"><span>Server IP ready</span><i class="fas fa-arrow-right"></i></div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- DIVIDER 3 - TRANSMISSION -->
+        <!-- ============================================ -->
+        <div class="transmission-divider" aria-hidden="true">
+            <span class="transmission-rail transmission-rail-left"></span>
+            <span class="transmission-marker"><i class="fas fa-signal"></i></span>
+            <span class="transmission-rail transmission-rail-right"></span>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- STAFF SECTION -->
+        <!-- ============================================ -->
+        <section id="staff" class="home-section home-reveal-section staff-section py-24 px-6 md:px-12 max-w-7xl mx-auto">
+            <div class="home-section-heading staff-heading">
+                <div>
+                    <span class="text-[#FFD700] text-xs font-bold uppercase tracking-[0.3em]">The people behind the city</span>
+                    <h2 class="text-4xl md:text-5xl font-black text-white mt-3">Meet your <span class="text-[#FFD700]">hosts</span></h2>
+                </div>
+                <div class="staff-live"><span></span> Staff online now</div>
+            </div>
+
+            <div class="home-reveal-grid staff-directory">
+                <article class="staff-member staff-member-lead"><img src="/images/xiivi.png" alt="XIIVI" class="staff-member-avatar"><div><h3>XIIVI</h3><span>Founder</span></div></article>
+                <article class="staff-member staff-member-lead"><img src="/images/kenvi.png" alt="kenvi" class="staff-member-avatar"><div><h3>kenvi</h3><span>Founder</span></div></article>
+                <article class="staff-member staff-member-lead"><img src="/images/serpent.png" alt="Serpent" class="staff-member-avatar"><div><h3>! 𝖘𝖊𝖗𝖕𝖊𝖓𝖙♔</h3><span>Co-Founder</span></div></article>
+                <article class="staff-member staff-member-lead"><img src="/images/freez.png" alt="Freez" class="staff-member-avatar"><div><h3>Freez</h3><span>Co-Founder</span></div></article>
+                <article class="staff-member"><img src="/images/rafael.png" alt="Rafael" class="staff-member-avatar"><div><h3>Rafael(becks)</h3><span>Server Manager</span></div></article>
+                <article class="staff-member"><img src="/images/luna.png" alt="Luna" class="staff-member-avatar"><div><h3>Luna</h3><span>Server Manager</span></div></article>
+                <article class="staff-member"><img src="/images/lasmer.png" alt="Lasmer" class="staff-member-avatar"><div><h3>Lasmer</h3><span>Staff Manager</span></div></article>
+                <article class="staff-member"><img src="/images/shasper.png" alt="shasper" class="staff-member-avatar"><div><h3>shasper</h3><span>Developer</span></div></article>
+                <article class="staff-member"><img src="/images/marwen-tn.png" alt="marwen-tn" class="staff-member-avatar"><div><h3>marwen-tn</h3><span>Developer</span></div></article>
+                <article class="staff-member"><img src="/images/yone%20sen.png" alt="Yone sen" class="staff-member-avatar"><div><h3>Yone sen</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/vlad.png" alt="vlad" class="staff-member-avatar"><div><h3>vlad</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/kai.png" alt="kai" class="staff-member-avatar"><div><h3>kai</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/zitouni.png" alt="zitouni" class="staff-member-avatar"><div><h3>zitouni</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/ghost.png" alt="ghost" class="staff-member-avatar"><div><h3>ghost</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/skon.png" alt="skon" class="staff-member-avatar"><div><h3>skon</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/shadow.png" alt="shadow" class="staff-member-avatar"><div><h3>shadow</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/raouf.png" alt="raouf" class="staff-member-avatar"><div><h3>raouf</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/karim.png" alt="karim" class="staff-member-avatar"><div><h3>karim</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/axel.png" alt="axel" class="staff-member-avatar"><div><h3>axel</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/flw mario.png" alt="FLW MRIO" class="staff-member-avatar"><div><h3>! 𝐹𝐿𝑊 𝗠★𝗥𝗜𝗢</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/p3dro.png" alt="P3dro" class="staff-member-avatar"><div><h3>P3dro</h3><span>Discord Manager</span></div></article>
+                <article class="staff-member"><img src="/images/houssein.png" alt="houssein" class="staff-member-avatar"><div><h3>houssein</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/michel.png" alt="michel" class="staff-member-avatar"><div><h3>michel</h3><span>Staff Team</span></div></article>
+                <article class="staff-member"><img src="/images/shinobi.png" alt="shinobi" class="staff-member-avatar"><div><h3>shinobi</h3><span>Staff Team</span></div></article>
+                <article class="staff-member" data-discord-id="1386696371679264959"><img src="/images/prince.png" alt="Prince" class="staff-member-avatar"><div><h3>Prince</h3><span>Storyline Director</span></div></article>
+                <article class="staff-member" data-discord-id="1298813279560532141"><img src="/images/bakka.png" alt="bakka" class="staff-member-avatar"><div><h3>bakka</h3><span>Storyline Director</span></div></article>
+                <article class="staff-member" data-discord-id="801943606603808798"><img src="/images/barbaros.png" alt="barbaros" class="staff-member-avatar"><div><h3>barbaros</h3><span>Storyline Director</span></div></article>
+                <article class="staff-member" data-discord-id="772211294497406996"><img src="/images/melon.png" alt="melon" class="staff-member-avatar"><div><h3>melon</h3><span>Storyline Director</span></div></article>
+            </div>
+        </section>
+
+        <!-- ============================================ -->
+<!-- FOOTER - CITY SKYLINE WITH SOCIAL HUB -->
+<!-- ============================================ -->
+<footer class="city-footer">
+    
+    <!-- Animated City Skyline -->
+    <div class="skyline-container">
+        <svg viewBox="0 0 1440 200" preserveAspectRatio="none" class="skyline-svg">
+            <defs>
+                <linearGradient id="buildingGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#0a0a0f;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            
+            <!-- Building 1 -->
+            <rect x="50" y="60" width="30" height="140" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            <rect class="window" x="55" y="70" width="6" height="6" fill="#FFD700" opacity="0.8"/>
+            <rect class="window" x="65" y="70" width="6" height="6" fill="#FFD700" opacity="0.3"/>
+            <rect class="window" x="55" y="85" width="6" height="6" fill="#FFD700" opacity="0.5"/>
+            <rect class="window" x="65" y="85" width="6" height="6" fill="#FFD700" opacity="0.7"/>
+            
+            <!-- Building 2 -->
+            <rect x="100" y="40" width="40" height="160" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            <rect class="window" x="108" y="50" width="6" height="6" fill="#FFD700" opacity="0.6"/>
+            <rect class="window" x="120" y="50" width="6" height="6" fill="#FFD700" opacity="0.9"/>
+            <rect class="window" x="108" y="65" width="6" height="6" fill="#FFD700" opacity="0.4"/>
+            <rect class="window" x="120" y="65" width="6" height="6" fill="#FFD700" opacity="0.8"/>
+            
+            <!-- Building 3 -->
+            <rect x="160" y="80" width="25" height="120" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            <rect class="window" x="165" y="88" width="5" height="5" fill="#FFD700" opacity="0.5"/>
+            <rect class="window" x="175" y="88" width="5" height="5" fill="#FFD700" opacity="0.3"/>
+            
+            <!-- Building 4 - Tall -->
+            <rect x="210" y="20" width="35" height="180" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            <rect class="window" x="218" y="30" width="6" height="6" fill="#FFD700" opacity="0.9"/>
+            <rect class="window" x="230" y="30" width="6" height="6" fill="#FFD700" opacity="0.7"/>
+            <rect class="window" x="218" y="45" width="6" height="6" fill="#FFD700" opacity="0.5"/>
+            <rect class="window" x="230" y="45" width="6" height="6" fill="#FFD700" opacity="0.8"/>
+            <rect class="window" x="218" y="60" width="6" height="6" fill="#FFD700" opacity="0.6"/>
+            <rect class="window" x="230" y="60" width="6" height="6" fill="#FFD700" opacity="0.4"/>
+            
+            <!-- Building 5 -->
+            <rect x="270" y="70" width="30" height="130" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            <rect class="window" x="278" y="80" width="5" height="5" fill="#FFD700" opacity="0.7"/>
+            <rect class="window" x="288" y="80" width="5" height="5" fill="#FFD700" opacity="0.3"/>
+            
+            <!-- More buildings... -->
+            <rect x="330" y="50" width="28" height="150" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            <rect x="380" y="90" width="22" height="110" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            <rect x="430" y="35" width="32" height="165" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            <rect x="490" y="75" width="25" height="125" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            <rect x="540" y="55" width="35" height="145" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            <rect x="600" y="85" width="20" height="115" fill="url(#buildingGrad)" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/>
+            
+            <!-- Ground -->
+            <rect x="0" y="180" width="1440" height="20" fill="#0a0a0f"/>
+            
+            <!-- Ground glow -->
+            <rect x="0" y="180" width="1440" height="2" fill="rgba(255,215,0,0.1)"/>
+        </svg>
+    </div>
+
+    <!-- Footer Content -->
+    <div class="footer-content-wrapper">
+        <div class="max-w-7xl mx-auto px-6 md:px-12 py-12">
+            
+            <div class="grid md:grid-cols-3 gap-12">
+                
+                <!-- Brand -->
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="logodis.png" alt="Experience RP logo" class="w-12 h-12 rounded-xl object-cover border border-[#FFD700]/50 shadow-lg shadow-[#FFD700]/10" />
+                        <div>
+                            <p class="text-white font-bold text-lg">Experience RP</p>
+                            <p class="text-[#FFD700] text-xs uppercase tracking-wider">Strict Roleplay</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm max-w-xs leading-relaxed">
+                        Where every decision shapes your destiny. 
+                        The most immersive roleplay experience in Los Santos.
+                    </p>
+                </div>
+
+                <!-- Social Hub -->
+                <div>
+                    <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-4">
+                        <span class="text-[#FFD700]">✦</span> Connect With Us
+                    </h4>
+                    <div class="space-y-3">
+                        <a href="https://www.youtube.com/channel/UCPDYmTLuePbY4FqUlO4ACog" target="_blank" rel="noreferrer" class="social-link group flex items-center gap-4 text-gray-400 hover:text-[#FFD700] transition-all">
+                            <span class="social-icon w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#FFD700]/20 transition-all">
+                                <i class="fab fa-youtube text-lg"></i>
+                            </span>
+                            <span class="text-sm">YouTube</span>
+                        </a>
+                        <a href="https://www.instagram.com/experienceroleplay_fivem/" target="_blank" rel="noreferrer" class="social-link group flex items-center gap-4 text-gray-400 hover:text-[#FFD700] transition-all">
+                            <span class="social-icon w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#FFD700]/20 transition-all">
+                                <i class="fab fa-instagram text-lg"></i>
+                            </span>
+                            <span class="text-sm">Instagram</span>
+                        </a>
+                        <a href="https://www.tiktok.com/@experienceroleplay_fivem?is_from_webapp=1&sender_device=pc" target="_blank" rel="noreferrer" class="social-link group flex items-center gap-4 text-gray-400 hover:text-[#FFD700] transition-all">
+                            <span class="social-icon w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#FFD700]/20 transition-all">
+                                <i class="fab fa-tiktok text-lg"></i>
+                            </span>
+                            <span class="text-sm">TikTok</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-4">
+                        <span class="text-[#FFD700]">✦</span> Quick Links
+                    </h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="rules.html" class="text-gray-400 hover:text-[#FFD700] transition-colors">Rules & Guidelines</a></li>
+                        <li><a href="#staff" class="text-gray-400 hover:text-[#FFD700] transition-colors">Staff Team</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="border-t border-[#FFD700]/10 mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-gray-600 text-xs">
+                    &copy; 2026 Experience RP. All rights reserved. 
+                    <span class="text-[#FFD700]/30 mx-2">|</span> 
+                    Made with <span class="text-[#FFD700]">❤</span> for the community
+                </p>
+                <div class="flex items-center gap-4 text-[10px] text-gray-600">
+                    <span>Server Status: <span id="footerServerStatus" class="text-emerald-400">Checking...</span></span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</footer>
+</main>
+</div>
+
+<!-- ============================================ -->
+<!-- SCRIPTS -->
+<!-- ============================================ -->
+<script type="module" src="/js/main.js"></script>
+<script type="module" src="/js/server-status.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Storyline | Experience RP</title>
+    <link rel="icon" type="image/png" href="/images/logoex.png" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="storyline-page">
+    <section class="storyline-intro-screen" aria-label="Storyline introduction">
+        <p class="storyline-intro-word" aria-label="The Descent"></p>
+    </section>
+    <audio class="storyline-music" preload="auto">
+        <source src="/audios/The%20Beast%20(From%20Sicario).mp3" type="audio/mpeg" />
+    </audio>
+    <main>
+        <section class="storyline-hero">
+            <img src="/storyline.png" alt="Experience RP Chapter 2: Code of Silence" class="storyline-hero-image" />
+            <div class="storyline-hero-overlay"></div>
+            <div class="storyline-hero-content">
+                <a href="index.html" class="storyline-back"><i class="fas fa-arrow-left"></i> Back to Experience RP</a>
+                <p class="storyline-kicker">Experience RP / Chapter 02</p>
+                <h1>Code of Silence</h1>
+                <p class="storyline-tagline">Silence was never their choice. Survival is.</p>
+                <a href="#story" class="storyline-scroll"><span>Read the story</span><i class="fas fa-arrow-down"></i></a>
+            </div>
+        </section>
+
+        <section id="story" class="storyline-content">
+            <div class="storyline-intro">
+                <p class="storyline-kicker">The beginning</p>
+                <h2>The Day Everything Changed</h2>
+                <p>July 10, 2026. It began as an ordinary morning in a city that had no idea it was living through its final hours of normality.</p>
+            </div>
+
+            <div class="storyline-timeline">
+                <article class="story-event">
+                    <div class="story-time">12:03 PM</div>
+                    <div class="story-marker"></div>
+                    <div class="story-event-body">
+                        <p class="story-kicker">The alarm</p>
+                        <h3>The message goes silent</h3>
+                        <p>Television broadcasts cut out. A single warning orders every citizen indoors, without explanation. Minutes later, military vehicles, tanks and fighter jets seal the city behind barricades.</p>
+                    </div>
+                </article>
+                <article class="story-event">
+                    <div class="story-time">15:30</div>
+                    <div class="story-marker"></div>
+                    <div class="story-event-body">
+                        <p class="story-kicker">The silent city</p>
+                        <h3>Three days under lockdown</h3>
+                        <p>The streets empty. Radios repeat the same command while distant engines, screams, explosions and gunfire move through the dark. Behind restricted walls, a secret war becomes a race against time.</p>
+                    </div>
+                </article>
+                <article class="story-event">
+                    <div class="story-time">Day four / 06:00 AM</div>
+                    <div class="story-marker"></div>
+                    <div class="story-event-body">
+                        <p class="story-kicker">The evacuation</p>
+                        <h3>Run to the shelters</h3>
+                        <p>Sirens wake the city. Families are ordered outside and sent toward shelters as panic swallows the streets. Then black smoke rises above the skyline, followed by a flash that changes everything.</p>
+                    </div>
+                </article>
+                <article class="story-event story-event-final">
+                    <div class="story-time">Twenty years later</div>
+                    <div class="story-marker"></div>
+                    <div class="story-event-body">
+                        <p class="story-kicker">Outside</p>
+                        <h3>A world no one remembers</h3>
+                        <p>Hundreds survived inside a nuclear bunker. Twenty years passed. When the vault finally opened, suited figures gave them one command: “It is time to go outside.” Beyond the hatch waited a ruined world, a secured zone and questions no one could answer.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="storyline-ending">
+                <p class="storyline-kicker">Chapter 02 / Now beginning</p>
+                <h2>The city is waiting.</h2>
+                <p>The old world is gone. The new one has no rules written yet. Every choice, alliance and secret will decide what Experience RP becomes.</p>
+                <a href="fivem://connect/89.42.88.45:30120" class="storyline-cta"><i class="fas fa-plug"></i> Enter the city</a>
+            </div>
+        </section>
+    </main>
+    <script>
+        const storylinePage = document.querySelector('.storyline-page');
+        const introScreen = document.querySelector('.storyline-intro-screen');
+        const introWord = document.querySelector('.storyline-intro-word');
+        const storylineMusic = document.querySelector('.storyline-music');
+
+        const startStorylineMusic = () => {
+            if (!storylineMusic) return;
+            storylineMusic.play().catch(() => {});
+        };
+
+        const playStorylineSound = () => {
+            startStorylineMusic();
+        };
+
+        const typeIntroWord = () => {
+            const introText = 'THE DESCENT';
+            let characterIndex = 0;
+            const typeNextCharacter = () => {
+                if (!introWord) return;
+                introWord.textContent += introText[characterIndex];
+                characterIndex += 1;
+                if (characterIndex < introText.length) {
+                    window.setTimeout(typeNextCharacter, 150);
+                } else {
+                    window.setTimeout(finishIntro, 700);
+                }
+            };
+            typeNextCharacter();
+        };
+
+        const finishIntro = () => {
+            startStorylineMusic();
+            storylinePage?.classList.add('storyline-entered');
+            window.setTimeout(() => {
+                storylinePage?.classList.add('storyline-ready', 'storyline-show-main');
+                introScreen?.setAttribute('aria-hidden', 'true');
+            }, 2150);
+        };
+
+        const closeAtmosphere = () => {
+            storylineMusic?.pause();
+        };
+
+        startStorylineMusic();
+        typeIntroWord();
+        window.addEventListener('pagehide', closeAtmosphere);
+        document.addEventListener('pointerdown', playStorylineSound, { once: true });
+        document.addEventListener('keydown', playStorylineSound, { once: true });
+    </script>
+</body>
+</html>
