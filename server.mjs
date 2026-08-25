@@ -7,14 +7,28 @@ const port = process.env.PORT || 3002;
 const websiteUrl = 'https://exp-rp.netlify.app/';
 const backendUrl = process.env.BACKEND_URL;
 
-const redirectUri = `${backendUrl}/auth/discord/callback`;
-
 const clientId = process.env.DISCORD_CLIENT_ID;
 const clientSecret = process.env.DISCORD_CLIENT_SECRET;
 const botToken = process.env.DISCORD_BOT_TOKEN;
 const guildId = process.env.DISCORD_GUILD_ID;
 
-const pendingStates = new Set();
+const redirectUri = `${backendUrl}/auth/discord/callback`;
+
+console.log('BACKEND_URL =', backendUrl);
+console.log('REDIRECT_URI =', redirectUri);
+console.log('CLIENT_ID =', clientId);
+
+
+const parseCookies = (cookieHeader = '') =>
+    Object.fromEntries(
+        cookieHeader
+            .split(';')
+            .filter(Boolean)
+            .map(cookie => {
+                const [key, ...value] = cookie.trim().split('=');
+                return [key, decodeURIComponent(value.join('='))];
+            })
+    );
 
 const send = (response, status, body) => {
     response.writeHead(status, {
@@ -40,8 +54,10 @@ const server = http.createServer(async (request, response) => {
         }
 
         const state = crypto.randomBytes(24).toString('hex');
-        pendingStates.add(state);
 
+response.setHeader('Set-Cookie', [
+    `oauth_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`
+]);
         const params = new URLSearchParams({
             client_id: clientId,
             response_type: 'code',
@@ -49,7 +65,7 @@ const server = http.createServer(async (request, response) => {
             scope: 'identify guilds.join',
             state
         });
-
+console.log('Discord OAuth URL:', `https://discord.com/oauth2/authorize?${params}`);
         response.writeHead(302, {
             Location: `https://discord.com/oauth2/authorize?${params}`
         });
@@ -62,19 +78,20 @@ const server = http.createServer(async (request, response) => {
         const { code, state, error } =
             Object.fromEntries(requestUrl.searchParams);
 
-        if (
-            error ||
-            !code ||
-            !state ||
-            !pendingStates.delete(state)
-        ) {
-            send(
-                response,
-                400,
-                'Discord authorization was cancelled or the state was invalid.'
-            );
-            return;
-        }
+const cookies = parseCookies(request.headers.cookie || '');
+const savedState = cookies.oauth_state;
+
+console.log('CALLBACK STATE:', state);
+console.log('SAVED STATE:', savedState);
+
+if (error || !code || !state || !savedState || state !== savedState) {
+    send(
+        response,
+        400,
+        'Discord authorization was cancelled or the state was invalid.'
+    );
+    return;
+}
 
         try {
             const tokenResponse = await fetch(
