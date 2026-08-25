@@ -1,35 +1,49 @@
-<<<<<<< HEAD
 import http from 'node:http';
 import crypto from 'node:crypto';
 import { URL } from 'node:url';
 
 process.loadEnvFile?.();
 
-const port = 3002;
-const websiteUrl = 'http://127.0.0.1:3000/';
-const redirectUri = `http://127.0.0.1:${port}/auth/discord/callback`;
+const port = process.env.PORT || 3002;
+
+const websiteUrl = 'https://exp-rp.netlify.app/';
+const backendUrl = process.env.BACKEND_URL;
+
+const redirectUri = `${backendUrl}/auth/discord/callback`;
+
 const clientId = process.env.DISCORD_CLIENT_ID;
 const clientSecret = process.env.DISCORD_CLIENT_SECRET;
 const botToken = process.env.DISCORD_BOT_TOKEN;
 const guildId = process.env.DISCORD_GUILD_ID;
+
 const pendingStates = new Set();
 
 const send = (response, status, body) => {
-    response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
+    response.writeHead(status, {
+        'Content-Type': 'text/plain; charset=utf-8'
+    });
     response.end(body);
 };
 
 const server = http.createServer(async (request, response) => {
-    const requestUrl = new URL(request.url, `http://${request.headers.host}`);
+    const requestUrl = new URL(
+        request.url,
+        `http://${request.headers.host}`
+    );
 
     if (requestUrl.pathname === '/auth/discord') {
-        if (!clientId || !clientSecret || !botToken || !guildId) {
-            send(response, 500, 'Discord OAuth is missing server configuration in .env');
+        if (!clientId || !clientSecret || !botToken || !guildId || !backendUrl) {
+            send(
+                response,
+                500,
+                'Discord OAuth is missing server configuration.'
+            );
             return;
         }
 
         const state = crypto.randomBytes(24).toString('hex');
         pendingStates.add(state);
+
         const params = new URLSearchParams({
             client_id: clientId,
             response_type: 'code',
@@ -37,177 +51,138 @@ const server = http.createServer(async (request, response) => {
             scope: 'identify guilds.join',
             state
         });
-        response.writeHead(302, { Location: `https://discord.com/oauth2/authorize?${params}` });
-        response.end();
-        return;
-    }
 
-    if (requestUrl.pathname === '/auth/discord/callback') {
-        const { code, state, error } = Object.fromEntries(requestUrl.searchParams);
-        if (error || !code || !state || !pendingStates.delete(state)) {
-            send(response, 400, 'Discord authorization was cancelled or the state was invalid.');
-            return;
-        }
-
-        try {
-            const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    client_id: clientId,
-                    client_secret: clientSecret,
-                    grant_type: 'authorization_code',
-                    code,
-                    redirect_uri: redirectUri
-                })
-            });
-            const tokenData = await tokenResponse.json();
-            if (!tokenResponse.ok) throw new Error(tokenData.error_description || 'Token exchange failed');
-
-            const userResponse = await fetch('https://discord.com/api/users/@me', {
-                headers: { Authorization: `Bearer ${tokenData.access_token}` }
-            });
-            const user = await userResponse.json();
-            if (!userResponse.ok) throw new Error('Could not read the Discord account');
-
-            const joinResponse = await fetch(`https://discord.com/api/guilds/${guildId}/members/${user.id}`, {
-                method: 'PUT',
-                headers: {
-                    Authorization: `Bot ${botToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ access_token: tokenData.access_token })
-            });
-            if (!joinResponse.ok && joinResponse.status !== 204) {
-                const joinError = await joinResponse.text();
-                throw new Error(`Could not add the account to the test server: ${joinError}`);
-            }
-
-            const username = user.global_name || user.username;
-            const avatar = user.avatar
-                ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=96`
-                : '';
-            const callbackParams = new URLSearchParams({ discord: 'connected', username, avatar });
-            response.writeHead(302, { Location: `${websiteUrl}?${callbackParams}` });
-            response.end();
-        } catch (error) {
-            console.error(error.message);
-            send(response, 502, 'Discord authorization could not be completed. Check the Bot permissions and .env values.');
-        }
-        return;
-    }
-
-    send(response, 404, 'Not found');
-});
-
-server.listen(port, '127.0.0.1', () => {
-    console.log(`Discord OAuth backend: http://127.0.0.1:${port}`);
-    console.log(`Redirect URI: ${redirectUri}`);
-});
-=======
-import http from 'node:http';
-import crypto from 'node:crypto';
-import { URL } from 'node:url';
-
-process.loadEnvFile?.();
-
-const port = 3002;
-const websiteUrl = 'http://127.0.0.1:3000/';
-const redirectUri = `http://127.0.0.1:${port}/auth/discord/callback`;
-const clientId = process.env.DISCORD_CLIENT_ID;
-const clientSecret = process.env.DISCORD_CLIENT_SECRET;
-const botToken = process.env.DISCORD_BOT_TOKEN;
-const guildId = process.env.DISCORD_GUILD_ID;
-const pendingStates = new Set();
-
-const send = (response, status, body) => {
-    response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
-    response.end(body);
-};
-
-const server = http.createServer(async (request, response) => {
-    const requestUrl = new URL(request.url, `http://${request.headers.host}`);
-
-    if (requestUrl.pathname === '/auth/discord') {
-        if (!clientId || !clientSecret || !botToken || !guildId) {
-            send(response, 500, 'Discord OAuth is missing server configuration in .env');
-            return;
-        }
-
-        const state = crypto.randomBytes(24).toString('hex');
-        pendingStates.add(state);
-        const params = new URLSearchParams({
-            client_id: clientId,
-            response_type: 'code',
-            redirect_uri: redirectUri,
-            scope: 'identify guilds.join',
-            state
+        response.writeHead(302, {
+            Location: `https://discord.com/oauth2/authorize?${params}`
         });
-        response.writeHead(302, { Location: `https://discord.com/oauth2/authorize?${params}` });
+
         response.end();
         return;
     }
 
     if (requestUrl.pathname === '/auth/discord/callback') {
-        const { code, state, error } = Object.fromEntries(requestUrl.searchParams);
-        if (error || !code || !state || !pendingStates.delete(state)) {
-            send(response, 400, 'Discord authorization was cancelled or the state was invalid.');
+        const { code, state, error } =
+            Object.fromEntries(requestUrl.searchParams);
+
+        if (
+            error ||
+            !code ||
+            !state ||
+            !pendingStates.delete(state)
+        ) {
+            send(
+                response,
+                400,
+                'Discord authorization was cancelled or the state was invalid.'
+            );
             return;
         }
 
         try {
-            const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    client_id: clientId,
-                    client_secret: clientSecret,
-                    grant_type: 'authorization_code',
-                    code,
-                    redirect_uri: redirectUri
-                })
-            });
+            const tokenResponse = await fetch(
+                'https://discord.com/api/oauth2/token',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        client_id: clientId,
+                        client_secret: clientSecret,
+                        grant_type: 'authorization_code',
+                        code,
+                        redirect_uri: redirectUri
+                    })
+                }
+            );
+
             const tokenData = await tokenResponse.json();
-            if (!tokenResponse.ok) throw new Error(tokenData.error_description || 'Token exchange failed');
 
-            const userResponse = await fetch('https://discord.com/api/users/@me', {
-                headers: { Authorization: `Bearer ${tokenData.access_token}` }
-            });
-            const user = await userResponse.json();
-            if (!userResponse.ok) throw new Error('Could not read the Discord account');
-
-            const joinResponse = await fetch(`https://discord.com/api/guilds/${guildId}/members/${user.id}`, {
-                method: 'PUT',
-                headers: {
-                    Authorization: `Bot ${botToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ access_token: tokenData.access_token })
-            });
-            if (!joinResponse.ok && joinResponse.status !== 204) {
-                const joinError = await joinResponse.text();
-                throw new Error(`Could not add the account to the test server: ${joinError}`);
+            if (!tokenResponse.ok) {
+                throw new Error(
+                    tokenData.error_description ||
+                        'Token exchange failed'
+                );
             }
 
-            const username = user.global_name || user.username;
+            const userResponse = await fetch(
+                'https://discord.com/api/users/@me',
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenData.access_token}`
+                    }
+                }
+            );
+
+            const user = await userResponse.json();
+
+            if (!userResponse.ok) {
+                throw new Error(
+                    'Could not read the Discord account'
+                );
+            }
+
+            const joinResponse = await fetch(
+                `https://discord.com/api/guilds/${guildId}/members/${user.id}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bot ${botToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        access_token: tokenData.access_token
+                    })
+                }
+            );
+
+            if (
+                !joinResponse.ok &&
+                joinResponse.status !== 204
+            ) {
+                const joinError = await joinResponse.text();
+
+                throw new Error(
+                    `Could not add the account to the test server: ${joinError}`
+                );
+            }
+
+            const username =
+                user.global_name || user.username;
+
             const avatar = user.avatar
                 ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=96`
                 : '';
-            const callbackParams = new URLSearchParams({ discord: 'connected', username, avatar });
-            response.writeHead(302, { Location: `${websiteUrl}?${callbackParams}` });
+
+            const callbackParams = new URLSearchParams({
+                discord: 'connected',
+                username,
+                avatar
+            });
+
+            response.writeHead(302, {
+                Location: `${websiteUrl}?${callbackParams}`
+            });
+
             response.end();
         } catch (error) {
             console.error(error.message);
-            send(response, 502, 'Discord authorization could not be completed. Check the Bot permissions and .env values.');
+
+            send(
+                response,
+                502,
+                'Discord authorization could not be completed. Check the Bot permissions and environment variables.'
+            );
         }
+
         return;
     }
 
     send(response, 404, 'Not found');
 });
 
-server.listen(port, '127.0.0.1', () => {
-    console.log(`Discord OAuth backend: http://127.0.0.1:${port}`);
+server.listen(port, '0.0.0.0', () => {
+    console.log(`Discord OAuth backend running on port ${port}`);
     console.log(`Redirect URI: ${redirectUri}`);
 });
->>>>>>> 7d0b39aa32d1f195e5e40a3764f308e4a1aaf7de
