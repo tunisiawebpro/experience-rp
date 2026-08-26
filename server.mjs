@@ -14,24 +14,15 @@ const clientId = process.env.DISCORD_CLIENT_ID;
 const clientSecret = process.env.DISCORD_CLIENT_SECRET;
 const botToken = process.env.DISCORD_BOT_TOKEN;
 const guildId = process.env.DISCORD_GUILD_ID;
-const databaseUrl = process.env.DATABASE_URL;
 
 const redirectUri = `${backendUrl}/auth/discord/callback`;
 
-if (!databaseUrl) {
-    console.error('DATABASE_URL is missing.');
-    process.exit(1);
-}
-
 const pool = new Pool({
-    connectionString: databaseUrl,
+    connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: false
     }
 });
-
-const SESSION_DAYS = 30;
-const SESSION_MAX_AGE = SESSION_DAYS * 24 * 60 * 60;
 
 const parseCookies = (cookieHeader = '') =>
     Object.fromEntries(
@@ -44,109 +35,73 @@ const parseCookies = (cookieHeader = '') =>
             })
     );
 
-const hashToken = token =>
-    crypto
-        .createHash('sha256')
-        .update(token)
-        .digest('hex');
-
-const createSessionToken = () =>
-    crypto.randomBytes(32).toString('hex');
-
-const send = (response, status, body) => {
-    response.writeHead(status, {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Access-Control-Allow-Origin': websiteUrl,
-        'Access-Control-Allow-Credentials': 'true'
-    });
-
-    response.end(body);
-};
-
 const sendJson = (response, status, data) => {
     response.writeHead(status, {
         'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': websiteUrl,
-        'Access-Control-Allow-Credentials': 'true',
-        'Cache-Control': 'no-store'
+        'Access-Control-Allow-Credentials': 'true'
     });
 
     response.end(JSON.stringify(data));
 };
 
-const setCookie = (response, name, value, maxAge) => {
-    response.setHeader(
-        'Set-Cookie',
-        `${name}=${encodeURIComponent(value)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${maxAge}`
-    );
+const send = (response, status, body) => {
+    response.writeHead(status, {
+        'Content-Type': 'text/plain; charset=utf-8'
+    });
+
+    response.end(body);
 };
 
-const clearCookie = (response, name) => {
-    response.setHeader(
-        'Set-Cookie',
-        `${name}=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0`
+const createSession = async (user) => {
+    const sessionId = crypto.randomBytes(32).toString('hex');
+
+    await pool.query(
+        `
+        INSERT INTO discord_sessions
+        (session_id, discord_id, username, avatar, created_at, expires_at)
+        VALUES ($1, $2, $3, $4, NOW(), NOW() + INTERVAL '30 days')
+        `,
+        [
+            sessionId,
+            user.id,
+            user.global_name || user.username,
+            user.avatar
+                ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=96`
+                : ''
+        ]
     );
+
+    return sessionId;
 };
 
-async function initializeDatabase() {
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS users (
-            discord_id TEXT PRIMARY KEY,
-            username TEXT NOT NULL,
-            avatar TEXT,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-    `);
-
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS sessions (
-            token_hash TEXT PRIMARY KEY,
-            discord_id TEXT NOT NULL REFERENCES users(discord_id) ON DELETE CASCADE,
-            expires_at TIMESTAMPTZ NOT NULL,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-    `);
-
-    await pool.query(`
-        DELETE FROM sessions
-        WHERE expires_at < NOW();
-    `);
-
-    console.log('Database initialized successfully.');
-}
-
-async function getCurrentUser(request) {
-    const cookies = parseCookies(request.headers.cookie || '');
-    const sessionToken = cookies.session_token;
-
-    if (!sessionToken) {
-        return null;
-    }
-
-    const tokenHash = hashToken(sessionToken);
+const getSession = async (sessionId) => {
+    if (!sessionId) return null;
 
     const result = await pool.query(
         `
-        SELECT
-            u.discord_id,
-            u.username,
-            u.avatar
-        FROM sessions s
-        INNER JOIN users u
-            ON u.discord_id = s.discord_id
-        WHERE s.token_hash = $1
-          AND s.expires_at > NOW()
-        LIMIT 1;
+        SELECT discord_id, username, avatar
+        FROM discord_sessions
+        WHERE session_id = $1
+        AND expires_at > NOW()
         `,
-        [tokenHash]
+        [sessionId]
     );
 
-    if (result.rows.length === 0) {
-        return null;
-    }
+    return result.rows[0] || null;
+};
 
-    return result.rows[0];
-}
+const deleteSession = async (sessionId) => {
+    if (!sessionId) return;
+
+    await pool.query(
+        `
+        DELETE FROM discord_sessions
+        WHERE session_id = $1
+        `,
+        [sessionId]
+    );
+};
 
 const server = http.createServer(async (request, response) => {
     const requestUrl = new URL(
@@ -154,12 +109,15 @@ const server = http.createServer(async (request, response) => {
         `http://${request.headers.host}`
     );
 
-    // CORS preflight
+    // ============================================
+    // CORS
+    // ============================================
+
     if (request.method === 'OPTIONS') {
         response.writeHead(204, {
             'Access-Control-Allow-Origin': websiteUrl,
             'Access-Control-Allow-Credentials': 'true',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type'
         });
 
@@ -167,14 +125,35 @@ const server = http.createServer(async (request, response) => {
         return;
     }
 
-    // --------------------------------------------
-    // DISCORD LOGIN
-    // --------------------------------------------
+    // ============================================
+    // DATABASE HEALTH CHECK
+    // ============================================
 
-    if (
-        request.method === 'GET' &&
-        requestUrl.pathname === '/auth/discord'
-    ) {
+    if (requestUrl.pathname === '/health') {
+        try {
+            await pool.query('SELECT 1');
+
+            sendJson(response, 200, {
+                status: 'ok',
+                database: 'connected'
+            });
+        } catch (error) {
+            console.error(error);
+
+            sendJson(response, 500, {
+                status: 'error',
+                database: 'disconnected'
+            });
+        }
+
+        return;
+    }
+
+    // ============================================
+    // DISCORD LOGIN
+    // ============================================
+
+    if (requestUrl.pathname === '/auth/discord') {
         if (
             !clientId ||
             !clientSecret ||
@@ -187,12 +166,15 @@ const server = http.createServer(async (request, response) => {
                 500,
                 'Discord OAuth is missing server configuration.'
             );
+
             return;
         }
 
         const state = crypto.randomBytes(24).toString('hex');
 
-        setCookie(response, 'oauth_state', state, 600);
+        response.setHeader('Set-Cookie', [
+            `oauth_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`
+        ]);
 
         const params = new URLSearchParams({
             client_id: clientId,
@@ -204,21 +186,19 @@ const server = http.createServer(async (request, response) => {
 
         response.writeHead(302, {
             Location:
-                `https://discord.com/oauth2/authorize?${params.toString()}`
+                `https://discord.com/oauth2/authorize?${params}`
         });
 
         response.end();
+
         return;
     }
 
-    // --------------------------------------------
+    // ============================================
     // DISCORD CALLBACK
-    // --------------------------------------------
+    // ============================================
 
-    if (
-        request.method === 'GET' &&
-        requestUrl.pathname === '/auth/discord/callback'
-    ) {
+    if (requestUrl.pathname === '/auth/discord/callback') {
         const { code, state, error } =
             Object.fromEntries(requestUrl.searchParams);
 
@@ -245,18 +225,17 @@ const server = http.createServer(async (request, response) => {
         }
 
         try {
-            // --------------------------------------------
-            // Exchange OAuth code for Discord token
-            // --------------------------------------------
-
+            // Exchange code for Discord token
             const tokenResponse = await fetch(
                 'https://discord.com/api/oauth2/token',
                 {
                     method: 'POST',
+
                     headers: {
                         'Content-Type':
                             'application/x-www-form-urlencoded'
                     },
+
                     body: new URLSearchParams({
                         client_id: clientId,
                         client_secret: clientSecret,
@@ -267,7 +246,8 @@ const server = http.createServer(async (request, response) => {
                 }
             );
 
-            const tokenData = await tokenResponse.json();
+            const tokenData =
+                await tokenResponse.json();
 
             if (!tokenResponse.ok) {
                 throw new Error(
@@ -276,10 +256,7 @@ const server = http.createServer(async (request, response) => {
                 );
             }
 
-            // --------------------------------------------
             // Get Discord user
-            // --------------------------------------------
-
             const userResponse = await fetch(
                 'https://discord.com/api/users/@me',
                 {
@@ -290,7 +267,8 @@ const server = http.createServer(async (request, response) => {
                 }
             );
 
-            const user = await userResponse.json();
+            const user =
+                await userResponse.json();
 
             if (!userResponse.ok) {
                 throw new Error(
@@ -298,18 +276,20 @@ const server = http.createServer(async (request, response) => {
                 );
             }
 
-            // --------------------------------------------
             // Add user to Discord server
-            // --------------------------------------------
-
             const joinResponse = await fetch(
                 `https://discord.com/api/guilds/${guildId}/members/${user.id}`,
                 {
                     method: 'PUT',
+
                     headers: {
-                        Authorization: `Bot ${botToken}`,
-                        'Content-Type': 'application/json'
+                        Authorization:
+                            `Bot ${botToken}`,
+
+                        'Content-Type':
+                            'application/json'
                     },
+
                     body: JSON.stringify({
                         access_token:
                             tokenData.access_token
@@ -325,98 +305,32 @@ const server = http.createServer(async (request, response) => {
                     await joinResponse.text();
 
                 throw new Error(
-                    `Could not add the account to the server: ${joinError}`
+                    `Could not add the account to the test server: ${joinError}`
                 );
             }
 
-            // --------------------------------------------
-            // Prepare user data
-            // --------------------------------------------
+            // ============================================
+            // CREATE DATABASE SESSION
+            // ============================================
 
-            const username =
-                user.global_name || user.username;
+            const sessionId =
+                await createSession(user);
 
-            const avatar = user.avatar
-                ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=96`
-                : '';
+            response.setHeader('Set-Cookie', [
+                `session_id=${sessionId}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=2592000`
+            ]);
 
-            // --------------------------------------------
-            // Save / update user
-            // --------------------------------------------
-
-            await pool.query(
-                `
-                INSERT INTO users (
-                    discord_id,
-                    username,
-                    avatar
-                )
-                VALUES ($1, $2, $3)
-                ON CONFLICT (discord_id)
-                DO UPDATE SET
-                    username = EXCLUDED.username,
-                    avatar = EXCLUDED.avatar;
-                `,
-                [
-                    user.id,
-                    username,
-                    avatar
-                ]
-            );
-
-            // --------------------------------------------
-            // Create persistent session
-            // --------------------------------------------
-
-            const sessionToken =
-                createSessionToken();
-
-            const tokenHash =
-                hashToken(sessionToken);
-
-            await pool.query(
-                `
-                INSERT INTO sessions (
-                    token_hash,
-                    discord_id,
-                    expires_at
-                )
-                VALUES (
-                    $1,
-                    $2,
-                    NOW() + INTERVAL '30 days'
-                );
-                `,
-                [
-                    tokenHash,
-                    user.id
-                ]
-            );
-
-            // Delete old OAuth state cookie
-            response.setHeader(
-                'Set-Cookie',
-                [
-                    `oauth_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`,
-                    `session_token=${encodeURIComponent(sessionToken)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${SESSION_MAX_AGE}`
-                ]
-            );
-
-            // --------------------------------------------
-            // Return to website
-            // --------------------------------------------
-
+            // Redirect back to website
             response.writeHead(302, {
-                Location:
-                    `${websiteUrl}?discord=connected`
+                Location: websiteUrl
             });
 
             response.end();
 
         } catch (error) {
             console.error(
-                'Discord OAuth error:',
-                error.message
+                'Discord callback error:',
+                error
             );
 
             send(
@@ -429,20 +343,26 @@ const server = http.createServer(async (request, response) => {
         return;
     }
 
-    // --------------------------------------------
-    // CHECK CURRENT SESSION
-    // --------------------------------------------
+    // ============================================
+    // CHECK CURRENT LOGIN
+    // ============================================
 
     if (
-        request.method === 'GET' &&
-        requestUrl.pathname === '/auth/me'
+        requestUrl.pathname === '/auth/me' &&
+        request.method === 'GET'
     ) {
         try {
-            const user =
-                await getCurrentUser(request);
+            const cookies = parseCookies(
+                request.headers.cookie || ''
+            );
 
-            if (!user) {
-                sendJson(response, 401, {
+            const session =
+                await getSession(
+                    cookies.session_id
+                );
+
+            if (!session) {
+                sendJson(response, 200, {
                     authenticated: false
                 });
 
@@ -451,68 +371,69 @@ const server = http.createServer(async (request, response) => {
 
             sendJson(response, 200, {
                 authenticated: true,
+
                 user: {
-                    discordId: user.discord_id,
-                    username: user.username,
-                    avatar: user.avatar
+                    id: session.discord_id,
+                    username: session.username,
+                    avatar: session.avatar
                 }
             });
 
         } catch (error) {
             console.error(
                 'Session check error:',
-                error.message
+                error
             );
 
             sendJson(response, 500, {
-                authenticated: false,
-                error: 'Could not check session.'
+                authenticated: false
             });
         }
 
         return;
     }
 
-    // --------------------------------------------
+    // ============================================
     // LOGOUT
-    // --------------------------------------------
+    // ============================================
 
     if (
-        request.method === 'POST' &&
-        requestUrl.pathname === '/auth/logout'
+        requestUrl.pathname === '/auth/logout' &&
+        request.method === 'POST'
     ) {
         try {
-            const cookies =
-                parseCookies(
-                    request.headers.cookie || ''
-                );
-
-            const sessionToken =
-                cookies.session_token;
-
-            if (sessionToken) {
-                await pool.query(
-                    `
-                    DELETE FROM sessions
-                    WHERE token_hash = $1;
-                    `,
-                    [hashToken(sessionToken)]
-                );
-            }
-
-            clearCookie(
-                response,
-                'session_token'
+            const cookies = parseCookies(
+                request.headers.cookie || ''
             );
 
-            sendJson(response, 200, {
-                success: true
+            await deleteSession(
+                cookies.session_id
+            );
+
+            response.writeHead(200, {
+                'Content-Type':
+                    'application/json; charset=utf-8',
+
+                'Access-Control-Allow-Origin':
+                    websiteUrl,
+
+                'Access-Control-Allow-Credentials':
+                    'true',
+
+                'Set-Cookie':
+                    'session_id=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0'
             });
+
+            response.end(
+                JSON.stringify({
+                    success: true
+                })
+            );
 
         } catch (error) {
             console.error(
                 'Logout error:',
-                error.message
+                error
             );
 
             sendJson(response, 500, {
@@ -523,40 +444,38 @@ const server = http.createServer(async (request, response) => {
         return;
     }
 
-    // --------------------------------------------
-    // HEALTH CHECK
-    // --------------------------------------------
-
-    if (
-        request.method === 'GET' &&
-        requestUrl.pathname === '/health'
-    ) {
-        try {
-            await pool.query('SELECT 1');
-
-            sendJson(response, 200, {
-                status: 'ok',
-                database: 'connected'
-            });
-
-        } catch (error) {
-            sendJson(response, 500, {
-                status: 'error',
-                database: 'disconnected'
-            });
-        }
-
-        return;
-    }
-
-    send(
-        response,
-        404,
-        'Not found'
-    );
+    send(response, 404, 'Not found');
 });
 
-async function startServer() {
+// ============================================
+// DATABASE INITIALIZATION
+// ============================================
+
+const initializeDatabase = async () => {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS discord_sessions (
+            session_id TEXT PRIMARY KEY,
+            discord_id TEXT NOT NULL,
+            username TEXT NOT NULL,
+            avatar TEXT,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            expires_at TIMESTAMP NOT NULL
+        )
+    `);
+
+    await pool.query(`
+        DELETE FROM discord_sessions
+        WHERE expires_at <= NOW()
+    `);
+
+    console.log('Database initialized.');
+};
+
+// ============================================
+// START SERVER
+// ============================================
+
+const startServer = async () => {
     try {
         await initializeDatabase();
 
@@ -576,12 +495,12 @@ async function startServer() {
 
     } catch (error) {
         console.error(
-            'Failed to initialize server:',
+            'Failed to initialize database:',
             error
         );
 
         process.exit(1);
     }
-}
+};
 
 startServer();
