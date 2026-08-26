@@ -105,60 +105,169 @@ document.addEventListener('keydown', (event) => {
 const discordLoginBtn = document.getElementById('discordLoginBtn');
 const discordAccountMenu = document.getElementById('discordAccountMenu');
 const discordSignOut = document.getElementById('discordSignOut');
-const discordAuthUrl = 'https://exp-rp-backend.onrender.com/auth/discord';
-const discordProfileStorageKey = 'experience-rp-discord-profile';
 
-discordLoginBtn?.addEventListener('click', (event) => {
-    event.preventDefault();
-    if (discordLoginBtn.classList.contains('is-connected')) {
-        discordAccountMenu?.toggleAttribute('hidden');
-        return;
-    }
-    window.location.assign(discordAuthUrl);
-});
+const discordAuthUrl =
+    'https://exp-rp-backend.onrender.com/auth/discord';
 
-const discordParams = new URLSearchParams(window.location.search);
+const discordApiUrl =
+    'https://exp-rp-backend.onrender.com';
+
 const renderDiscordProfile = (profile) => {
     if (!profile?.username || !discordLoginBtn) return;
+
     discordLoginBtn.classList.add('is-connected');
+
     const avatar = document.createElement('img');
+
     avatar.className = 'discord-avatar';
-    avatar.src = profile.avatar?.startsWith('https://cdn.discordapp.com/') ? profile.avatar : '/images/logoex.png';
+
+    avatar.src =
+        profile.avatar?.startsWith(
+            'https://cdn.discordapp.com/'
+        )
+            ? profile.avatar
+            : '/images/logoex.png';
+
     avatar.alt = '';
+
     const username = document.createElement('span');
+
     username.textContent = profile.username;
+
     const arrow = document.createElement('i');
-    arrow.className = 'fas fa-chevron-down discord-login-arrow';
-    arrow.setAttribute('aria-hidden', 'true');
-    discordLoginBtn.replaceChildren(avatar, username, arrow);
-    discordLoginBtn.setAttribute('aria-label', `Connected as ${profile.username}`);
+
+    arrow.className =
+        'fas fa-chevron-down discord-login-arrow';
+
+    arrow.setAttribute(
+        'aria-hidden',
+        'true'
+    );
+
+    discordLoginBtn.replaceChildren(
+        avatar,
+        username,
+        arrow
+    );
+
+    discordLoginBtn.setAttribute(
+        'aria-label',
+        `Connected as ${profile.username}`
+    );
 };
 
-const connectedUsername = discordParams.get('username');
-const connectedAvatar = discordParams.get('avatar');
-if (discordParams.get('discord') === 'connected' && connectedUsername) {
-    const profile = { username: connectedUsername, avatar: connectedAvatar || '' };
-    localStorage.setItem(discordProfileStorageKey, JSON.stringify(profile));
-    renderDiscordProfile(profile);
-    window.history.replaceState({}, document.title, window.location.pathname);
-} else {
-    try {
-        renderDiscordProfile(JSON.parse(localStorage.getItem(discordProfileStorageKey)));
-    } catch {
-        localStorage.removeItem(discordProfileStorageKey);
-    }
-}
+const resetDiscordProfile = () => {
+    discordAccountMenu?.setAttribute(
+        'hidden',
+        ''
+    );
 
-discordSignOut?.addEventListener('click', () => {
-    discordAccountMenu?.setAttribute('hidden', '');
-    localStorage.removeItem(discordProfileStorageKey);
-    discordLoginBtn?.classList.remove('is-connected');
+    discordLoginBtn?.classList.remove(
+        'is-connected'
+    );
+
     if (discordLoginBtn) {
-        discordLoginBtn.innerHTML = '<i class="fab fa-discord" aria-hidden="true"></i><span>Login with Discord</span><i class="fas fa-arrow-up-right-from-square discord-login-arrow" aria-hidden="true"></i>';
-        discordLoginBtn.setAttribute('aria-label', 'Login with Discord');
-    }
-});
+        discordLoginBtn.innerHTML = `
+            <i class="fab fa-discord" aria-hidden="true"></i>
+            <span>Login with Discord</span>
+            <i class="fas fa-arrow-up-right-from-square discord-login-arrow" aria-hidden="true"></i>
+        `;
 
+        discordLoginBtn.setAttribute(
+            'aria-label',
+            'Login with Discord'
+        );
+    }
+};
+
+discordLoginBtn?.addEventListener(
+    'click',
+    (event) => {
+        event.preventDefault();
+
+        if (
+            discordLoginBtn.classList.contains(
+                'is-connected'
+            )
+        ) {
+            discordAccountMenu?.toggleAttribute(
+                'hidden'
+            );
+
+            return;
+        }
+
+        window.location.assign(
+            discordAuthUrl
+        );
+    }
+);
+
+// Check persistent Discord session
+const checkDiscordSession = async () => {
+    try {
+        const response = await fetch(
+            `${discordApiUrl}/auth/me`,
+            {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store'
+            }
+        );
+
+        if (!response.ok) {
+            resetDiscordProfile();
+            return;
+        }
+
+        const data = await response.json();
+
+        if (
+            data.authenticated &&
+            data.user
+        ) {
+            renderDiscordProfile({
+                username: data.user.username,
+                avatar: data.user.avatar
+            });
+        } else {
+            resetDiscordProfile();
+        }
+
+    } catch (error) {
+        console.error(
+            'Discord session check failed:',
+            error
+        );
+
+        resetDiscordProfile();
+    }
+};
+
+checkDiscordSession();
+
+// Sign out
+discordSignOut?.addEventListener(
+    'click',
+    async () => {
+        try {
+            await fetch(
+                `${discordApiUrl}/auth/logout`,
+                {
+                    method: 'POST',
+                    credentials: 'include'
+                }
+            );
+        } catch (error) {
+            console.error(
+                'Logout failed:',
+                error
+            );
+        }
+
+        resetDiscordProfile();
+    }
+);
 // ============================================
 // NAVIGATION TOGGLE (Mobile & Collapse)
 // ============================================
