@@ -535,24 +535,44 @@
 .discord-login {
     position: fixed;
     top: 1.25rem;
-    right: 1.5rem;
+    right: 1rem;
     z-index: 60;
+
     display: inline-flex;
     align-items: center;
     gap: 0.7rem;
+
     min-height: 3rem;
+    max-width: calc(100vw - 2rem);
+
     padding: 0.7rem 1rem;
+
     border: 1px solid rgba(255, 215, 0, 0.32);
     border-radius: 0.45rem;
-    background: linear-gradient(135deg, rgba(25, 25, 25, 0.96), rgba(10, 10, 10, 0.92));
-    box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.3), inset 0 1px rgba(255, 255, 255, 0.06);
+
+    background: linear-gradient(
+        135deg,
+        rgba(25, 25, 25, 0.96),
+        rgba(10, 10, 10, 0.92)
+    );
+
+    box-shadow:
+        0 0.8rem 2rem rgba(0, 0, 0, 0.3),
+        inset 0 1px rgba(255, 255, 255, 0.06);
+
     color: #f5f7ff;
     font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+
     backdrop-filter: blur(12px);
-    transition: background 220ms ease, border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+
+    transition:
+        background 220ms ease,
+        border-color 220ms ease,
+        transform 220ms ease,
+        box-shadow 220ms ease;
 }
 
 .discord-login > .fa-discord {
@@ -653,17 +673,23 @@
 .discord-login:hover > .fa-discord,
 .discord-login:focus-visible > .fa-discord { color: #090909; }
 
-@media (max-width: 640px) {
+ @media (max-width: 640px) {
     .discord-login {
         top: 1rem;
-        right: 1rem;
+        right: 0.75rem;
         min-height: 2.6rem;
+        max-width: calc(100vw - 1.5rem);
         padding: 0.6rem 0.75rem;
     }
 
-    .discord-login span { display: none; }
+    .discord-login span {
+        display: none;
+    }
 
-    .discord-account-menu { right: 1rem; }
+    .discord-account-menu {
+        right: 0.75rem;
+        max-width: calc(100vw - 1.5rem);
+    }
 }
 
 /* Shared reveal rhythm for the homepage sections. */
@@ -1874,3 +1900,10 @@ body.rules-page::before {
     }
 }
 
+
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
