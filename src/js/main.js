@@ -82,25 +82,40 @@ const unlockTypingSound = () => {
 };
 
 typeEntranceText();
-document.addEventListener('pointerdown', unlockTypingSound, { once: true });
-document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Enter') unlockTypingSound();
-});
 
-document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Enter' || !entranceScreen || entranceScreen.classList.contains('hidden')) return;
+document.addEventListener('pointerdown', unlockTypingSound, { once: true });
+
+const enterWebsite = () => {
+    if (!entranceScreen || entranceScreen.classList.contains('hidden')) return;
+
     sessionStorage.setItem(entranceSeenKey, 'true');
     typingStopped = true;
     clearTimeout(typingTimeout);
     typingAudioContext?.suspend();
+
     entranceScreen.style.opacity = '0';
     entranceScreen.style.transition = 'opacity 0.8s ease';
+
     setTimeout(() => {
         entranceScreen.classList.add('hidden');
         mainWebsite?.classList.remove('hidden');
         document.getElementById('bgVideo')?.play().catch(() => {});
     }, 800);
+};
+
+// PC — ENTER
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        enterWebsite();
+    } else {
+        unlockTypingSound();
+    }
 });
+
+// PHONE — TAP
+entranceScreen?.addEventListener('touchstart', () => {
+    enterWebsite();
+}, { passive: true }); 
 
 const discordLoginBtn = document.getElementById('discordLoginBtn');
 const discordAccountMenu = document.getElementById('discordAccountMenu');
