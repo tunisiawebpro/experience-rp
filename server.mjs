@@ -16,7 +16,6 @@ const botToken = process.env.DISCORD_BOT_TOKEN;
 const guildId = process.env.DISCORD_GUILD_ID;
 
 const redirectUri = `${backendUrl}/auth/discord/callback`;
-
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -321,11 +320,21 @@ const server = http.createServer(async (request, response) => {
             ]);
 
             // Redirect back to website
-            response.writeHead(302, {
-                Location: websiteUrl
-            });
+const avatarUrl = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=96`
+    : '';
 
-            response.end();
+const profileParams = new URLSearchParams({
+    discord: 'connected',
+    username: user.global_name || user.username,
+    avatar: avatarUrl
+});
+
+response.writeHead(302, {
+    Location: `${websiteUrl}?${profileParams.toString()}`
+});
+
+response.end();
 
         } catch (error) {
             console.error(

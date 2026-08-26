@@ -112,22 +112,33 @@ const discordAuthUrl =
 const discordApiUrl =
     'https://exp-rp-backend.onrender.com';
 
+    const discordProfileStorageKey =
+    'experience-rp-discord-profile';
+
 const renderDiscordProfile = (profile) => {
     if (!profile?.username || !discordLoginBtn) return;
 
     discordLoginBtn.classList.add('is-connected');
 
     const avatar = document.createElement('img');
+
     avatar.className = 'discord-avatar';
-    avatar.src = profile.avatar || '/images/logoex.png';
+
+    avatar.src =
+        profile.avatar?.startsWith('https://cdn.discordapp.com/')
+            ? profile.avatar
+            : '/images/logoex.png';
+
     avatar.alt = '';
 
     const username = document.createElement('span');
     username.textContent = profile.username;
 
     const arrow = document.createElement('i');
+
     arrow.className =
         'fas fa-chevron-down discord-login-arrow';
+
     arrow.setAttribute('aria-hidden', 'true');
 
     discordLoginBtn.replaceChildren(
@@ -173,6 +184,56 @@ discordLoginBtn?.addEventListener('click', (event) => {
 });
 
 const checkDiscordSession = async () => {
+    // First: check if Discord just redirected us back
+    const params = new URLSearchParams(window.location.search);
+
+    const connectedUsername = params.get('username');
+    const connectedAvatar = params.get('avatar');
+
+    if (
+        params.get('discord') === 'connected' &&
+        connectedUsername
+    ) {
+        const profile = {
+            username: connectedUsername,
+            avatar: connectedAvatar || ''
+        };
+
+        localStorage.setItem(
+            discordProfileStorageKey,
+            JSON.stringify(profile)
+        );
+
+        renderDiscordProfile(profile);
+
+        // Remove ?discord=...&username=...&avatar=...
+        // from the URL
+        window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+        );
+
+        return;
+    }
+
+    // Second: use saved profile
+    try {
+        const savedProfile = JSON.parse(
+            localStorage.getItem(discordProfileStorageKey)
+        );
+
+        if (savedProfile?.username) {
+            renderDiscordProfile(savedProfile);
+            return;
+        }
+    } catch {
+        localStorage.removeItem(
+            discordProfileStorageKey
+        );
+    }
+
+    // Third: try backend session
     try {
         const response = await fetch(
             `${discordApiUrl}/auth/me`,
@@ -187,26 +248,31 @@ const checkDiscordSession = async () => {
         console.log('Discord session:', data);
 
         if (data.authenticated && data.user) {
-            renderDiscordProfile({
+            const profile = {
                 username: data.user.username,
-                avatar: data.user.avatar
-            });
-        } else {
-            resetDiscordProfile();
+                avatar: data.user.avatar || ''
+            };
+
+            localStorage.setItem(
+                discordProfileStorageKey,
+                JSON.stringify(profile)
+            );
+
+            renderDiscordProfile(profile);
         }
     } catch (error) {
         console.error(
             'Discord session check failed:',
             error
         );
-
-        resetDiscordProfile();
     }
 };
 
 checkDiscordSession();
 
 discordSignOut?.addEventListener('click', async () => {
+    discordAccountMenu?.setAttribute('hidden', '');
+
     try {
         await fetch(
             `${discordApiUrl}/auth/logout`,
@@ -219,8 +285,13 @@ discordSignOut?.addEventListener('click', async () => {
         console.error('Logout failed:', error);
     }
 
+    localStorage.removeItem(
+        discordProfileStorageKey
+    );
+
     resetDiscordProfile();
 });
+
 // ============================================
 // NAVIGATION TOGGLE (Mobile & Collapse)
 // ============================================
