@@ -10,6 +10,7 @@ let typingAudioContext;
 let typingStarted = false;
 let typingStopped = false;
 let typingTimeout;
+let activeTypingSources = new Set();
 
 const navigationEntry = performance.getEntriesByType('navigation')[0];
 const isPageRefresh = navigationEntry?.type === 'reload';
@@ -21,8 +22,6 @@ if (entranceScreen && entranceWasSeen && !isPageRefresh) {
     entranceScreen.classList.add('hidden');
     mainWebsite?.classList.remove('hidden');
 }
-
-let activeTypingSources = new Set();
 
 const playTypingSound = () => {
     try {
@@ -207,16 +206,21 @@ const typeEntranceText = () => {
 };
 
 
-// Start typing on desktop
-typeEntranceText();
+// Start typing on desktop immediately
+if (!('ontouchstart' in window)) {
+    typeEntranceText();
+}
 
+// Mobile: unlock audio on first touch, then start typing
+if ('ontouchstart' in window) {
+    document.addEventListener('touchstart', () => {
+        unlockTypingSound();
 
-// Unlock audio on first user interaction
-document.addEventListener(
-    'pointerdown',
-    unlockTypingSound,
-    { once: true }
-);
+        if (!typingStarted) {
+            typeEntranceText();
+        }
+    }, { once: true });
+}
 
 
 // Enter website
