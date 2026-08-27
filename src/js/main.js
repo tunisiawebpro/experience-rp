@@ -314,47 +314,108 @@ const menuBtn = document.getElementById('menuBtn');
 const navbar = document.getElementById('navbar');
 const collapseBtn = document.getElementById('collapseBtn');
 const showNavBtn = document.getElementById('showNavBtn');
-let isCollapsed = false;
 
-// Mobile menu toggle
+
+// =========================
+// MOBILE OPEN
+// =========================
+
 menuBtn?.addEventListener('click', () => {
-    navbar.classList.toggle('-translate-x-full');
+    if (window.innerWidth >= 768) return;
+
+    // Open navbar
+    navbar.classList.remove('-translate-x-full');
+
+    // Hide menu button while navbar is open
+    menuBtn.classList.add('hidden');
 });
 
-// Close mobile menu on link click
-document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-        if (window.innerWidth < 768) {
-            navbar.classList.add('-translate-x-full');
-        }
-    });
-});
 
-// Collapse sidebar on desktop
+// =========================
+// COLLAPSE NAVBAR
+// =========================
+
 collapseBtn?.addEventListener('click', () => {
-    isCollapsed = !isCollapsed;
+
     const main = document.querySelector('main');
-    const navLinks = document.querySelectorAll('.nav-link span');
-    const navTexts = document.querySelectorAll('.nav-link .text-sm');
-    const brandText = document.querySelector('.nav-brand-text');
-    const collapseSpan = collapseBtn.querySelector('span');
-    const collapseIcon = collapseBtn.querySelector('i');
-    
-    if (isCollapsed) {
-        navbar.style.transform = 'translateX(-100%)';
-        main.classList.remove('md:ml-64');
-        main.classList.add('md:ml-0');
-        showNavBtn?.classList.remove('hidden');
-    } else {
-        navbar.style.transform = '';
-        main.classList.remove('md:ml-20');
-        main.classList.remove('md:ml-0');
-        main.classList.add('md:ml-64');
-        showNavBtn?.classList.add('hidden');
+
+    // =====================
+    // MOBILE
+    // =====================
+    if (window.innerWidth < 768) {
+
+        // Close navbar
+        navbar.classList.add('-translate-x-full');
+
+        // Show menu button again
+        menuBtn?.classList.remove('hidden');
+
+        return;
     }
+
+
+    // =====================
+    // DESKTOP
+    // =====================
+
+    // Remove the class that forces navbar visible on desktop
+    navbar.classList.remove('md:translate-x-0');
+
+    // Hide navbar on desktop
+    navbar.classList.add('md:-translate-x-full');
+
+    // Move main content
+    main?.classList.remove('md:ml-64');
+    main?.classList.add('md:ml-0');
+
+    // Show the > button
+    showNavBtn?.classList.remove('hidden');
 });
 
-showNavBtn?.addEventListener('click', () => collapseBtn?.click());
+
+// =========================
+// SHOW NAVBAR DESKTOP
+// =========================
+
+showNavBtn?.addEventListener('click', () => {
+
+    if (window.innerWidth < 768) return;
+
+    const main = document.querySelector('main');
+
+    // Remove desktop hidden state
+    navbar.classList.remove('md:-translate-x-full');
+
+    // Make navbar visible
+    navbar.classList.add('md:translate-x-0');
+
+    // Restore main content
+    main?.classList.remove('md:ml-0');
+    main?.classList.add('md:ml-64');
+
+    // Hide > button
+    showNavBtn?.classList.add('hidden');
+});
+
+
+// =========================
+// MOBILE LINK CLICK
+// =========================
+
+document.querySelectorAll('.nav-link').forEach(link => {
+
+    link.addEventListener('click', () => {
+
+        if (window.innerWidth < 768) {
+
+            navbar.classList.add('-translate-x-full');
+
+            menuBtn?.classList.remove('hidden');
+        }
+
+    });
+
+});
 
 // ============================================
 // SMOOTH SCROLL FOR NAV LINKS

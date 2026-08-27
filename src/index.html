@@ -55,10 +55,9 @@
     <!-- ============================================ -->
     <!-- NAVIGATION (Left Sidebar) -->
     <!-- ============================================ -->
-    <nav id="navbar" class="fixed left-0 top-0 h-full w-64 bg-black/95 backdrop-blur-lg border-r border-[#FFD700]/20 transition-all duration-300 z-50 -translate-x-full md:translate-x-0 overflow-y-auto">
-        <div class="p-6 border-b border-[#FFD700]/20">
+<nav id="navbar" class="fixed left-0 top-0 h-full w-64 bg-black/95 backdrop-blur-lg border-r border-[#FFD700]/20 transition-transform duration-300 z-50 -translate-x-full md:translate-x-0 overflow-y-auto">        <div class="p-6 border-b border-[#FFD700]/20">
             <div class="flex items-center gap-3">
-                <img src="/images/logodis.png" alt="Experience RP logo" class="w-12 h-12 rounded-xl object-cover border border-[#FFD700]/50 shadow-lg shadow-[#FFD700]/10" />
+                <img src="logodis.png" alt="Experience RP logo" class="w-12 h-12 rounded-xl object-cover border border-[#FFD700]/50 shadow-lg shadow-[#FFD700]/10" />
                 <div>
                     <span class="text-white font-bold text-lg block">Experience RP</span>
                     <span class="text-[#FFD700] text-xs uppercase tracking-wider">Strict Roleplay</span>
@@ -66,7 +65,7 @@
             </div>
         </div>
         
-        <nav class="p-4 space-y-1">
+        <div class="p-4 space-y-1">
             <a href="#home" class="nav-link active">
                 <i class="fas fa-home w-5 text-center text-[#FFD700]"></i>
                 <span>Home</span>
@@ -79,7 +78,7 @@
                 <i class="fas fa-book-open w-5 text-center text-[#FFD700]"></i>
                 <span>Storyline</span>
             </a>
-        </nav>
+        </div>
         
         <!-- Collapse Button -->
         <div class="absolute bottom-4 left-0 w-full px-4">
@@ -95,9 +94,14 @@
     </button>
 
     <!-- Mobile Hamburger Menu Button -->
-    <button id="menuBtn" class="fixed top-4 left-4 z-50 p-3 rounded-xl bg-black/80 backdrop-blur-lg border border-[#FFD700]/20 hover:border-[#FFD700]/50 transition-colors md:hidden">
-        <i class="fas fa-bars text-xl text-[#FFD700]"></i>
-    </button>
+    <!-- Mobile Hamburger Menu Button -->
+<button
+    id="menuBtn"
+    class="fixed top-4 left-4 z-[60] p-3 rounded-xl bg-black/80 backdrop-blur-lg border border-[#FFD700]/20 hover:border-[#FFD700]/50 transition-colors md:hidden"
+    aria-label="Open navigation"
+>
+    <i class="fas fa-chevron-right text-xl text-[#FFD700]"></i>
+</button>
 
     <!-- ============================================ -->
     <!-- MAIN CONTENT -->
@@ -488,7 +492,7 @@
                 <!-- Brand -->
                 <div>
                     <div class="flex items-center gap-3 mb-4">
-                        <img src="/images/logodis.png" alt="Experience RP logo" class="w-12 h-12 rounded-xl object-cover border border-[#FFD700]/50 shadow-lg shadow-[#FFD700]/10" />
+                        <img src="/publics/images/logodis.png" alt="Experience RP logo" class="w-12 h-12 rounded-xl object-cover border border-[#FFD700]/50 shadow-lg shadow-[#FFD700]/10" />
                         <div>
                             <p class="text-white font-bold text-lg">Experience RP</p>
                             <p class="text-[#FFD700] text-xs uppercase tracking-wider">Strict Roleplay</p>
@@ -561,7 +565,7 @@
 <!-- ============================================ -->
 <!-- SCRIPTS -->
 <!-- ============================================ -->
-<script type="module" src="./js/main.js"></script>
-<script type="module" src="./js/server-status.js"></script>
+<script type="module" src="/js/main.js"></script>
+<script type="module" src="/js/server-status.js"></script>
 </body>
 </html>
