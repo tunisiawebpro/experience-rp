@@ -22,86 +22,241 @@ if (entranceScreen && entranceWasSeen && !isPageRefresh) {
     mainWebsite?.classList.remove('hidden');
 }
 
+let activeTypingSources = new Set();
+
 const playTypingSound = () => {
     try {
-        typingAudioContext ??= new AudioContext();
-        if (typingAudioContext.state === 'suspended') typingAudioContext.resume();
-        const now = typingAudioContext.currentTime;
-        const click = typingAudioContext.createBufferSource();
-        const clickBuffer = typingAudioContext.createBuffer(1, typingAudioContext.sampleRate * 0.035, typingAudioContext.sampleRate);
-        const noise = clickBuffer.getChannelData(0);
-        for (let index = 0; index < noise.length; index += 1) {
-            noise[index] = (Math.random() * 2 - 1) * (1 - index / noise.length);
+        typingAudioContext ??= new (window.AudioContext || window.webkitAudioContext)();
+
+        if (typingAudioContext.state === 'suspended') {
+            typingAudioContext.resume();
         }
+
+        if (typingAudioContext.state !== 'running') return;
+
+        const now = typingAudioContext.currentTime;
+
+        // Click / keyboard noise
+        const click = typingAudioContext.createBufferSource();
+
+        const clickBuffer = typingAudioContext.createBuffer(
+            1,
+            Math.floor(typingAudioContext.sampleRate * 0.035),
+            typingAudioContext.sampleRate
+        );
+
+        const noise = clickBuffer.getChannelData(0);
+
+        for (let index = 0; index < noise.length; index += 1) {
+            noise[index] =
+                (Math.random() * 2 - 1) *
+                (1 - index / noise.length);
+        }
+
         click.buffer = clickBuffer;
+
         const filter = typingAudioContext.createBiquadFilter();
         filter.type = 'bandpass';
         filter.frequency.value = 1800;
         filter.Q.value = 1.2;
+
         const clickGain = typingAudioContext.createGain();
         clickGain.gain.setValueAtTime(0.11, now);
-        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
-        click.connect(filter).connect(clickGain).connect(typingAudioContext.destination);
-        click.start(now);
+        clickGain.gain.exponentialRampToValueAtTime(
+            0.001,
+            now + 0.035
+        );
 
+        click
+            .connect(filter)
+            .connect(clickGain)
+            .connect(typingAudioContext.destination);
+
+        // Small tone
         const tone = typingAudioContext.createOscillator();
         const toneGain = typingAudioContext.createGain();
+
         tone.type = 'triangle';
-        tone.frequency.setValueAtTime(160 + Math.random() * 30, now);
-        tone.frequency.exponentialRampToValueAtTime(85, now + 0.07);
+
+        tone.frequency.setValueAtTime(
+            160 + Math.random() * 30,
+            now
+        );
+
+        tone.frequency.exponentialRampToValueAtTime(
+            85,
+            now + 0.07
+        );
+
         toneGain.gain.setValueAtTime(0.045, now);
-        toneGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
-        tone.connect(toneGain).connect(typingAudioContext.destination);
+        toneGain.gain.exponentialRampToValueAtTime(
+            0.001,
+            now + 0.07
+        );
+
+        tone
+            .connect(toneGain)
+            .connect(typingAudioContext.destination);
+
+        // Track active sounds
+        activeTypingSources.add(click);
+        activeTypingSources.add(tone);
+
+        click.onended = () => {
+            activeTypingSources.delete(click);
+        };
+
+        tone.onended = () => {
+            activeTypingSources.delete(tone);
+        };
+
+        click.start(now);
+        click.stop(now + 0.05);
+
         tone.start(now);
         tone.stop(now + 0.075);
-        click.stop(now + 0.05);
+
     } catch {
+        // Ignore audio errors
     }
 };
 
-const typeEntranceText = () => {
-    if (!entranceParagraph || typingStarted || (entranceWasSeen && !isPageRefresh)) return;
-    typingStarted = true;
-    let characterIndex = 0;
-    const typeNextCharacter = () => {
-        if (typingStopped) return;
-        entranceParagraph.textContent += entranceText[characterIndex];
-        if (entranceText[characterIndex] !== ' ' && entranceText[characterIndex] !== '\n') playTypingSound();
-        characterIndex += 1;
-        if (characterIndex < entranceText.length) typingTimeout = setTimeout(typeNextCharacter, 42);
-    };
-    typingTimeout = setTimeout(typeNextCharacter, 2400);
-};
 
+// Unlock audio after the user's first interaction
 const unlockTypingSound = () => {
     try {
-        typingAudioContext ??= new AudioContext();
-        typingAudioContext.resume();
+        typingAudioContext ??= new (
+            window.AudioContext ||
+            window.webkitAudioContext
+        )();
+
+        if (typingAudioContext.state === 'suspended') {
+            typingAudioContext.resume();
+        }
     } catch {
+        // Ignore audio errors
     }
 };
 
+
+// Stop ALL currently playing typing sounds immediately
+const stopTypingSound = () => {
+    try {
+        activeTypingSources.forEach((source) => {
+            try {
+                source.stop();
+            } catch {
+                // Source may already be stopped
+            }
+        });
+
+        activeTypingSources.clear();
+
+        if (typingAudioContext) {
+            typingAudioContext.suspend();
+        }
+    } catch {
+        // Ignore audio errors
+    }
+};
+
+
+// Entrance typing effect
+const typeEntranceText = () => {
+    if (
+        !entranceParagraph ||
+        typingStarted ||
+        (entranceWasSeen && !isPageRefresh)
+    ) {
+        return;
+    }
+
+    typingStarted = true;
+
+    let characterIndex = 0;
+
+    const typeNextCharacter = () => {
+        if (typingStopped) return;
+
+        entranceParagraph.textContent +=
+            entranceText[characterIndex];
+
+        // Play sound for every non-space character
+        if (
+            entranceText[characterIndex] !== ' ' &&
+            entranceText[characterIndex] !== '\n'
+        ) {
+            playTypingSound();
+        }
+
+        characterIndex += 1;
+
+        if (characterIndex < entranceText.length) {
+            typingTimeout = setTimeout(
+                typeNextCharacter,
+                42
+            );
+        }
+    };
+
+    // Initial delay before typing starts
+    typingTimeout = setTimeout(
+        typeNextCharacter,
+        2400
+    );
+};
+
+
+// Start typing on desktop
 typeEntranceText();
 
-document.addEventListener('pointerdown', unlockTypingSound, { once: true });
 
+// Unlock audio on first user interaction
+document.addEventListener(
+    'pointerdown',
+    unlockTypingSound,
+    { once: true }
+);
+
+
+// Enter website
 const enterWebsite = () => {
-    if (!entranceScreen || entranceScreen.classList.contains('hidden')) return;
+    if (
+        !entranceScreen ||
+        entranceScreen.classList.contains('hidden')
+    ) {
+        return;
+    }
 
-    sessionStorage.setItem(entranceSeenKey, 'true');
+    sessionStorage.setItem(
+        entranceSeenKey,
+        'true'
+    );
+
+    // Stop typing immediately
     typingStopped = true;
+
     clearTimeout(typingTimeout);
-    typingAudioContext?.suspend();
+
+    // 🔇 Stop typing sound immediately
+    stopTypingSound();
 
     entranceScreen.style.opacity = '0';
-    entranceScreen.style.transition = 'opacity 0.8s ease';
+    entranceScreen.style.transition =
+        'opacity 0.8s ease';
 
     setTimeout(() => {
         entranceScreen.classList.add('hidden');
+
         mainWebsite?.classList.remove('hidden');
-        document.getElementById('bgVideo')?.play().catch(() => {});
+
+        document
+            .getElementById('bgVideo')
+            ?.play()
+            .catch(() => {});
     }, 800);
 };
+
 
 // PC — ENTER
 document.addEventListener('keydown', (event) => {
@@ -112,10 +267,16 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
+
 // PHONE — TAP
-entranceScreen?.addEventListener('touchstart', () => {
-    enterWebsite();
-}, { passive: true }); 
+entranceScreen?.addEventListener(
+    'touchstart',
+    () => {
+        enterWebsite();
+    },
+    { passive: true }
+);
+
 
 const discordLoginBtn = document.getElementById('discordLoginBtn');
 const discordAccountMenu = document.getElementById('discordAccountMenu');
