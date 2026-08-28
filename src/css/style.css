@@ -1940,30 +1940,15 @@ body {
 
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
+
+    overflow: hidden;
 }
 
 
 /* Subtle gold line on navbar edge */
 
 #navbar::after {
-    content: "";
-
-    position: absolute;
-    top: 0;
-    right: 0;
-
-    width: 1px;
-    height: 100%;
-
-    background: linear-gradient(
-        180deg,
-        transparent 0%,
-        rgba(255, 215, 0, 0.18) 35%,
-        rgba(255, 215, 0, 0.06) 65%,
-        transparent 100%
-    );
-
-    pointer-events: none;
+    content: none;
 }
 
 
@@ -1976,32 +1961,50 @@ body {
     content: "";
 
     position: absolute;
-
-    width: 260px;
-    height: 260px;
-
-    left: 45%;
-    top: 50%;
-
-    transform: translate(-50%, -50%);
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(255, 215, 0, 0.035) 0%,
-            rgba(255, 215, 0, 0.018) 38%,
-            transparent 70%
-        );
-
-    border: 1px solid rgba(255, 215, 0, 0.055);
-
-    box-shadow:
-        0 0 55px rgba(255, 215, 0, 0.025);
+    inset: 0;
 
     pointer-events: none;
+    z-index: 0;
+
+    background:
+
+        /* TOP LEFT */
+        radial-gradient(
+            circle 150px at -80px 15%,
+            transparent 0 116px,
+            rgba(255, 215, 0, 0.12) 117px,
+            transparent 119px
+        ),
+
+        /* BOTTOM LEFT */
+        radial-gradient(
+            circle 150px at -85px 85%,
+            transparent 0 116px,
+            rgba(255, 215, 0, 0.10) 117px,
+            transparent 119px
+        ),
+
+        /* TOP RIGHT */
+        radial-gradient(
+            circle 150px at calc(100% + 85px) 25%,
+            transparent 0 116px,
+            rgba(255, 215, 0, 0.10) 117px,
+            transparent 119px
+        ),
+
+        /* BOTTOM RIGHT */
+        radial-gradient(
+            circle 150px at calc(100% + 80px) 75%,
+            transparent 0 116px,
+            rgba(255, 215, 0, 0.08) 117px,
+            transparent 119px
+        );
+
+    filter: drop-shadow(
+        0 0 12px rgba(255, 215, 0, 0.025)
+    );
 }
+
 
 
 /* ---------------------------------------------------------
@@ -2189,6 +2192,9 @@ footer {
 .home-side-glow {
     position: absolute;
 
+    width: 520px;
+    height: 520px;
+
     border-radius: 50%;
 
     pointer-events: none;
@@ -2196,32 +2202,32 @@ footer {
     background:
         radial-gradient(
             circle,
-            rgba(255, 215, 0, 0.025) 0%,
-            rgba(255, 215, 0, 0.012) 42%,
+            rgba(255, 215, 0, 0.045) 0%,
+            rgba(255, 215, 0, 0.022) 40%,
             transparent 70%
         );
 
-    border: 1px solid rgba(255, 215, 0, 0.075);
+    border: 1px solid rgba(255, 215, 0, 0.14);
 
     box-shadow:
-        0 0 70px rgba(255, 215, 0, 0.025);
+        0 0 85px rgba(255, 215, 0, 0.035);
 }
 
 
 /* LEFT */
 
 .home-side-left {
-    width: 520px;
-    height: 520px;
+    width: 560px;
+    height: 560px;
 
-    left: -430px;
+    left: -445px;
     top: 25%;
 }
 
 .home-side-right {
-    width: 430px;
-    height: 430px;
+    width: 500px;
+    height: 500px;
 
-    right: -350px;
-    top: 55%;
+    right: -390px;
+    top: 50%;
 }

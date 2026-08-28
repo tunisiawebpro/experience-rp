@@ -55,6 +55,37 @@ const send = (response, status, body) => {
 const createSession = async (user) => {
     const sessionId = crypto.randomBytes(32).toString('hex');
 
+    const username = user.global_name || user.username;
+
+    const avatar = user.avatar
+        ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=96`
+        : '';
+
+    // ============================================
+    // CREATE / UPDATE USER
+    // ============================================
+
+    await pool.query(
+        `
+        INSERT INTO users
+        (discord_id, username, avatar, created_at)
+        VALUES ($1, $2, $3, NOW())
+        ON CONFLICT (discord_id)
+        DO UPDATE SET
+            username = EXCLUDED.username,
+            avatar = EXCLUDED.avatar
+        `,
+        [
+            user.id,
+            username,
+            avatar
+        ]
+    );
+
+    // ============================================
+    // CREATE LOGIN SESSION
+    // ============================================
+
     await pool.query(
         `
         INSERT INTO discord_sessions
@@ -64,10 +95,8 @@ const createSession = async (user) => {
         [
             sessionId,
             user.id,
-            user.global_name || user.username,
-            user.avatar
-                ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=96`
-                : ''
+            username,
+            avatar
         ]
     );
 
