@@ -23,39 +23,66 @@ if (entranceScreen && entranceWasSeen && !isPageRefresh) {
     mainWebsite?.classList.remove('hidden');
 }
 // ============================================================
-// ENTRANCE TYPING SOUND
+// TYPING SOUND
+// ============================================================
 
-// Create and play typing sound
-const playTypingSound = () => {
+const createTypingAudioContext = () => {
     try {
-        typingAudioContext ??= new (
-            window.AudioContext ||
-            window.webkitAudioContext
-        )();
+        if (!typingAudioContext) {
+            const AudioContextClass =
+                window.AudioContext ||
+                window.webkitAudioContext;
 
-        // Try to resume the audio context
-        if (typingAudioContext.state === 'suspended') {
-            typingAudioContext.resume().catch(() => {});
+            if (!AudioContextClass) {
+                return null;
+            }
+
+            typingAudioContext = new AudioContextClass();
         }
 
-        // Don't try to play if the browser hasn't unlocked audio
-        if (typingAudioContext.state !== 'running') {
+        return typingAudioContext;
+
+    } catch {
+        return null;
+    }
+};
+
+
+const playTypingSound = () => {
+    try {
+        const audioContext = createTypingAudioContext();
+
+        if (!audioContext) return;
+
+        /*
+         * On mobile, the AudioContext can start suspended.
+         * Try to resume it before playing.
+         */
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().catch(() => {});
+        }
+
+        /*
+         * If it is still suspended, don't crash the typing effect.
+         * The text will continue normally.
+         */
+        if (audioContext.state !== 'running') {
             return;
         }
 
-        const now = typingAudioContext.currentTime;
+        const now = audioContext.currentTime;
 
 
         // --------------------------------------------------------
         // Keyboard click
         // --------------------------------------------------------
 
-        const click = typingAudioContext.createBufferSource();
+        const click = audioContext.createBufferSource();
 
-        const clickBuffer = typingAudioContext.createBuffer(
+        const clickBuffer = audioContext.createBuffer(
             1,
-            Math.floor(typingAudioContext.sampleRate * 0.035),
-            typingAudioContext.sampleRate
+            Math.floor(audioContext.sampleRate * 0.035),
+            audioContext.sampleRate
         );
 
         const noise = clickBuffer.getChannelData(0);
@@ -69,16 +96,19 @@ const playTypingSound = () => {
         click.buffer = clickBuffer;
 
 
-        const filter = typingAudioContext.createBiquadFilter();
+        const filter = audioContext.createBiquadFilter();
 
         filter.type = 'bandpass';
         filter.frequency.value = 1800;
         filter.Q.value = 1.2;
 
 
-        const clickGain = typingAudioContext.createGain();
+        const clickGain = audioContext.createGain();
 
-        clickGain.gain.setValueAtTime(0.11, now);
+        clickGain.gain.setValueAtTime(
+            0.11,
+            now
+        );
 
         clickGain.gain.exponentialRampToValueAtTime(
             0.001,
@@ -89,16 +119,16 @@ const playTypingSound = () => {
         click
             .connect(filter)
             .connect(clickGain)
-            .connect(typingAudioContext.destination);
+            .connect(audioContext.destination);
 
 
         // --------------------------------------------------------
         // Small tone
         // --------------------------------------------------------
 
-        const tone = typingAudioContext.createOscillator();
+        const tone = audioContext.createOscillator();
 
-        const toneGain = typingAudioContext.createGain();
+        const toneGain = audioContext.createGain();
 
 
         tone.type = 'triangle';
@@ -127,7 +157,7 @@ const playTypingSound = () => {
 
         tone
             .connect(toneGain)
-            .connect(typingAudioContext.destination);
+            .connect(audioContext.destination);
 
 
         // --------------------------------------------------------
@@ -147,10 +177,12 @@ const playTypingSound = () => {
         };
 
 
-        // Start sounds
+        // --------------------------------------------------------
+        // Start
+        // --------------------------------------------------------
+
         click.start(now);
         click.stop(now + 0.05);
-
 
         tone.start(now);
         tone.stop(now + 0.075);
@@ -163,18 +195,17 @@ const playTypingSound = () => {
 
 
 // ============================================================
-// UNLOCK TYPING AUDIO
+// UNLOCK AUDIO
 // ============================================================
 
 const unlockTypingSound = () => {
     try {
-        typingAudioContext ??= new (
-            window.AudioContext ||
-            window.webkitAudioContext
-        )();
+        const audioContext = createTypingAudioContext();
 
-        if (typingAudioContext.state === 'suspended') {
-            typingAudioContext.resume().catch(() => {});
+        if (!audioContext) return;
+
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().catch(() => {});
         }
 
     } catch {
@@ -185,12 +216,13 @@ const unlockTypingSound = () => {
 
 
 // ============================================================
-// STOP TYPING SOUND IMMEDIATELY
+// STOP TYPING SOUND
 // ============================================================
 
 const stopTypingSound = () => {
     try {
 
+        // Stop every currently playing source immediately
         activeTypingSources.forEach((source) => {
             try {
                 source.stop();
@@ -202,6 +234,7 @@ const stopTypingSound = () => {
         activeTypingSources.clear();
 
 
+        // Suspend audio context
         if (typingAudioContext) {
             typingAudioContext.suspend().catch(() => {});
         }
@@ -214,7 +247,7 @@ const stopTypingSound = () => {
 
 
 // ============================================================
-// ENTRANCE TYPING EFFECT
+// ENTRANCE TYPING
 // ============================================================
 
 const typeEntranceText = () => {
@@ -230,6 +263,8 @@ const typeEntranceText = () => {
 
     typingStarted = true;
 
+    typingStopped = false;
+
 
     let characterIndex = 0;
 
@@ -242,7 +277,7 @@ const typeEntranceText = () => {
         }
 
 
-        // Make sure the character exists
+        // Safety check
         if (characterIndex >= entranceText.length) {
             return;
         }
@@ -275,10 +310,11 @@ const typeEntranceText = () => {
                 42
             );
         }
+
     };
 
 
-    // Delay before typing starts
+    // Initial delay
     typingTimeout = setTimeout(
         typeNextCharacter,
         2400
@@ -288,12 +324,10 @@ const typeEntranceText = () => {
 
 
 // ============================================================
-// START ENTRANCE TYPING
+// START TYPING
 // ============================================================
 
-// IMPORTANT:
-// Start typing on both PC and mobile.
-// Do NOT use ontouchstart detection here.
+// Start typing on all devices
 typeEntranceText();
 
 
@@ -312,33 +346,31 @@ const enterWebsite = () => {
     }
 
 
-    // Remember that entrance was seen
+    // Remember entrance
     sessionStorage.setItem(
         entranceSeenKey,
         'true'
     );
 
 
-    // Stop typing immediately
+    // Stop typing
     typingStopped = true;
 
-
-    // Cancel pending typing timeout
     clearTimeout(typingTimeout);
 
 
-    // Stop every currently playing typing sound
+    // Stop audio immediately
     stopTypingSound();
 
 
-    // Fade out entrance
+    // Fade entrance
     entranceScreen.style.opacity = '0';
 
     entranceScreen.style.transition =
         'opacity 0.8s ease';
 
 
-    // Show main website
+    // Show website
     setTimeout(() => {
 
         entranceScreen.classList.add('hidden');
@@ -358,7 +390,7 @@ const enterWebsite = () => {
 
 
 // ============================================================
-// PC — ENTER KEY
+// PC — ENTER
 // ============================================================
 
 document.addEventListener('keydown', (event) => {
@@ -381,17 +413,17 @@ document.addEventListener('keydown', (event) => {
 // PHONE — TAP
 // ============================================================
 
-// One tap = enter website
-// The typing text/sound is stopped immediately.
 entranceScreen?.addEventListener(
     'touchstart',
     () => {
 
+        // Enter immediately
         enterWebsite();
 
     },
     { passive: true }
 );
+
 
 
 
