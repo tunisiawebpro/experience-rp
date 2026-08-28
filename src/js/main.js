@@ -54,10 +54,6 @@ const playTypingSound = async () => {
             window.webkitAudioContext
         )();
 
-        alert(
-            `Audio state AFTER create: ${typingAudioContext.state}`
-        );
-
         const audioContext = getTypingAudioContext();
 
         if (!audioContext || typingStopped) return;
