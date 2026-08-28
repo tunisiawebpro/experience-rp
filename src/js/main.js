@@ -48,6 +48,13 @@ const getTypingAudioContext = () => {
 
 const playTypingSound = async () => {
     try {
+alert('TYPING SOUND CALLED');
+
+        typingAudioContext ??= new (
+            window.AudioContext ||
+            window.webkitAudioContext
+        )();
+
         const audioContext = getTypingAudioContext();
 
         if (!audioContext || typingStopped) return;
