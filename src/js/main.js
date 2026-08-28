@@ -48,12 +48,15 @@ const getTypingAudioContext = () => {
 
 const playTypingSound = async () => {
     try {
-alert(`Audio state: ${typingAudioContext?.state || 'not created'}`);
 
         typingAudioContext ??= new (
             window.AudioContext ||
             window.webkitAudioContext
         )();
+
+        alert(
+            `Audio state AFTER create: ${typingAudioContext.state}`
+        );
 
         const audioContext = getTypingAudioContext();
 
