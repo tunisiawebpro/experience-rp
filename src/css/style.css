@@ -1386,6 +1386,321 @@
     .story-event-body { grid-column: 2; grid-row: 2; padding-bottom: 3rem; }
 }
 
+/* =========================================================
+   STORYLINE — CINEMATIC ENHANCEMENTS
+   ========================================================= */
+
+/* --- Cinematic atmosphere --- */
+
+.storyline-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+}
+
+/* --- Hero cinematic vignette --- */
+
+.storyline-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            transparent 35%,
+            rgba(0, 0, 0, 0.35) 72%,
+            rgba(0, 0, 0, 0.82) 100%
+        );
+}
+
+/* --- Hero slow cinematic movement --- */
+
+.storyline-ready .storyline-hero-image {
+    animation:
+        storyline-image-breathe 14s ease-in-out infinite alternate;
+}
+
+@keyframes storyline-image-breathe {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.045);
+    }
+}
+
+
+/* =========================================================
+   STORY EVENTS — CLASSIFIED FILE EFFECT
+   ========================================================= */
+
+.story-event-body {
+    position: relative;
+    padding: 1.5rem 1.8rem 3.5rem;
+    border-left: 1px solid rgba(255, 215, 0, 0.08);
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 215, 0, 0.035),
+            transparent 70%
+        );
+
+    transition:
+        border-color 300ms ease,
+        transform 300ms ease,
+        background 300ms ease;
+}
+
+.story-event-body::before {
+    content: "ARCHIVED EVENT";
+
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+
+    font-size: 0.52rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: rgba(255, 215, 0, 0.35);
+}
+
+.story-event-body:hover {
+    transform: translateX(8px);
+    border-left-color: rgba(255, 215, 0, 0.55);
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 215, 0, 0.07),
+            transparent 75%
+        );
+}
+
+
+/* =========================================================
+   TIMELINE MARKERS
+   ========================================================= */
+
+.story-marker {
+    transition:
+        transform 300ms ease,
+        box-shadow 300ms ease;
+}
+
+.story-event:hover .story-marker {
+    transform: scale(1.5);
+
+    box-shadow:
+        0 0 0 5px rgba(255, 215, 0, 0.06),
+        0 0 1.5rem rgba(255, 215, 0, 0.8);
+}
+
+
+/* =========================================================
+   EVENT REVEAL
+   ========================================================= */
+
+.story-event {
+    opacity: 0;
+    transform: translateY(35px);
+
+    transition:
+        opacity 700ms ease,
+        transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.story-event.story-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   TIME LABEL
+   ========================================================= */
+
+.story-time {
+    position: relative;
+}
+
+.story-time::after {
+    content: "TIMESTAMP";
+
+    display: block;
+    margin-top: 0.35rem;
+
+    font-size: 0.45rem;
+    letter-spacing: 0.18em;
+    color: rgba(255, 255, 255, 0.22);
+}
+
+
+/* =========================================================
+   STORY INTRO
+   ========================================================= */
+
+.storyline-intro {
+    position: relative;
+}
+
+.storyline-intro::before {
+    content: "EXP-RP / ARCHIVE 02";
+
+    display: block;
+    margin-bottom: 1.2rem;
+
+    font-family: monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    color: rgba(255, 215, 0, 0.45);
+}
+
+
+/* =========================================================
+   ENDING — TRANSMISSION FEEL
+   ========================================================= */
+
+.storyline-ending {
+    position: relative;
+    overflow: hidden;
+}
+
+.storyline-ending::before {
+    content: "TRANSMISSION // END OF RECORD";
+
+    display: block;
+    margin-bottom: 1.5rem;
+
+    font-family: monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+
+    color: rgba(255, 215, 0, 0.4);
+}
+
+.storyline-ending::after {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #ffd700,
+            transparent
+        );
+
+    opacity: 0.35;
+
+    animation: transmission-line 4s ease-in-out infinite;
+}
+
+@keyframes transmission-line {
+    0%,
+    100% {
+        transform: translateX(-30%);
+        opacity: 0.15;
+    }
+
+    50% {
+        transform: translateX(30%);
+        opacity: 0.6;
+    }
+}
+
+
+/* =========================================================
+   ENTER CITY BUTTON
+   ========================================================= */
+
+.storyline-cta {
+    position: relative;
+    overflow: hidden;
+}
+
+.storyline-cta::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: -120%;
+
+    width: 80%;
+    height: 100%;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 215, 0, 0.15),
+        transparent
+    );
+
+    transform: skewX(-20deg);
+
+    transition: left 700ms ease;
+}
+
+.storyline-cta:hover::before {
+    left: 140%;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+    .story-event-body {
+        padding: 1.25rem 1.2rem 3rem;
+    }
+
+    .story-event-body::before {
+        display: none;
+    }
+
+    .story-event-body:hover {
+        transform: translateX(3px);
+    }
+
+    .storyline-ending::before {
+        font-size: 0.45rem;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .storyline-ready .storyline-hero-image,
+    .storyline-ending::after {
+        animation: none !important;
+    }
+
+    .story-event {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
 /* ============================================ */
 /* HOLOGRAPHIC PODS - FEATURES */
 /* ============================================ */
@@ -1936,7 +2251,7 @@ body {
 
     box-shadow:
         12px 0 40px rgba(0, 0, 0, 0.35),
-        inset -1px 0 rgba(255, 215, 0, 0.035);
+        inset -1px 0 rgba(255, 215, 0, 0.07);
 
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
@@ -1945,10 +2260,35 @@ body {
 }
 
 
-/* Subtle gold line on navbar edge */
+/* ---------------------------------------------------------
+   NAVBAR GOLD EDGE
+   --------------------------------------------------------- */
 
 #navbar::after {
-    content: none;
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    right: 0;
+
+    width: 1px;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            180deg,
+            transparent 5%,
+            rgba(255, 215, 0, 0.20) 20%,
+            rgba(255, 215, 0, 0.30) 50%,
+            rgba(255, 215, 0, 0.20) 80%,
+            transparent 95%
+        );
+
+    box-shadow:
+        0 0 12px rgba(255, 215, 0, 0.10);
+
+    pointer-events: none;
 }
 
 
@@ -1972,38 +2312,40 @@ body {
         radial-gradient(
             circle 150px at -80px 15%,
             transparent 0 116px,
-            rgba(255, 215, 0, 0.12) 117px,
-            transparent 119px
+            rgba(255, 215, 0, 0.24) 117px,
+            transparent 121px
         ),
 
         /* BOTTOM LEFT */
         radial-gradient(
             circle 150px at -85px 85%,
             transparent 0 116px,
-            rgba(255, 215, 0, 0.10) 117px,
-            transparent 119px
+            rgba(255, 215, 0, 0.21) 117px,
+            transparent 121px
         ),
 
         /* TOP RIGHT */
         radial-gradient(
             circle 150px at calc(100% + 85px) 25%,
             transparent 0 116px,
-            rgba(255, 215, 0, 0.10) 117px,
-            transparent 119px
+            rgba(255, 215, 0, 0.21) 117px,
+            transparent 121px
         ),
 
         /* BOTTOM RIGHT */
         radial-gradient(
             circle 150px at calc(100% + 80px) 75%,
             transparent 0 116px,
-            rgba(255, 215, 0, 0.08) 117px,
-            transparent 119px
+            rgba(255, 215, 0, 0.18) 117px,
+            transparent 121px
         );
 
-    filter: drop-shadow(
-        0 0 12px rgba(255, 215, 0, 0.025)
-    );
+    filter:
+        drop-shadow(
+            0 0 16px rgba(255, 215, 0, 0.07)
+        );
 }
+
 
 
 
@@ -2067,7 +2409,6 @@ body {
 
 .home-bg-effects {
     position: absolute;
-
     top: 100vh;
     left: 0;
 
@@ -2075,14 +2416,14 @@ body {
     height: calc(100% - 100vh);
 
     pointer-events: none;
-
     overflow: hidden;
-
     z-index: 0;
 }
 
 
-/* Main centered gold arc */
+/* =========================================================
+   MAIN CENTERED GOLD ARC
+   ========================================================= */
 
 .home-bg-effects::before {
     content: "";
@@ -2102,24 +2443,25 @@ body {
     background:
         radial-gradient(
             circle,
-            rgba(255, 215, 0, 0.075) 0%,
-            rgba(255, 215, 0, 0.042) 28%,
-            rgba(255, 215, 0, 0.018) 48%,
+            rgba(255, 215, 0, 0.13) 0%,
+            rgba(255, 215, 0, 0.075) 28%,
+            rgba(255, 215, 0, 0.035) 48%,
             transparent 70%
         );
 
-    border: 1px solid rgba(255, 215, 0, 0.115);
+    border: 1px solid rgba(255, 215, 0, 0.30);
 
     box-shadow:
-        0 0 90px rgba(255, 215, 0, 0.045),
-        inset 0 0 70px rgba(255, 215, 0, 0.018);
+        0 0 110px rgba(255, 215, 0, 0.10),
+        inset 0 0 80px rgba(255, 215, 0, 0.045);
 
     pointer-events: none;
 }
 
 
-
-/* Smaller secondary arc */
+/* =========================================================
+   SMALLER SECONDARY ARC
+   ========================================================= */
 
 .home-bg-effects::after {
     content: "";
@@ -2139,14 +2481,14 @@ body {
     background:
         radial-gradient(
             circle,
-            rgba(255, 215, 0, 0.035),
+            rgba(255, 215, 0, 0.075),
             transparent 68%
         );
 
-    border: 1px solid rgba(255, 215, 0, 0.065);
+    border: 1px solid rgba(255, 215, 0, 0.20);
 
     box-shadow:
-        0 0 65px rgba(255, 215, 0, 0.025);
+        0 0 80px rgba(255, 215, 0, 0.065);
 
     pointer-events: none;
 }
@@ -2162,28 +2504,6 @@ footer {
     position: relative;
 }
 
-
-/* ---------------------------------------------------------
-   MOBILE
-   --------------------------------------------------------- */
-
-@media (max-width: 768px) {
-
-    #navbar::before {
-        width: 190px;
-        height: 190px;
-    }
-
-    .home-bg-effects::before {
-        width: 260px;
-        height: 260px;
-    }
-
-    .home-bg-effects::after {
-        width: 160px;
-        height: 160px;
-    }
-}
 
 /* =========================================================
    SIDE GOLD ARCS
@@ -2202,15 +2522,15 @@ footer {
     background:
         radial-gradient(
             circle,
-            rgba(255, 215, 0, 0.045) 0%,
-            rgba(255, 215, 0, 0.022) 40%,
+            rgba(255, 215, 0, 0.085) 0%,
+            rgba(255, 215, 0, 0.040) 40%,
             transparent 70%
         );
 
-    border: 1px solid rgba(255, 215, 0, 0.14);
+    border: 1px solid rgba(255, 215, 0, 0.32);
 
     box-shadow:
-        0 0 85px rgba(255, 215, 0, 0.035);
+        0 0 105px rgba(255, 215, 0, 0.075);
 }
 
 
@@ -2224,10 +2544,491 @@ footer {
     top: 25%;
 }
 
+
+/* RIGHT */
+
 .home-side-right {
     width: 500px;
     height: 500px;
 
     right: -390px;
     top: 50%;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    #navbar::before {
+        width: 190px;
+        height: 190px;
+    }
+
+    .home-bg-effects::before {
+        width: 260px;
+        height: 260px;
+    }
+
+    .home-bg-effects::after {
+        width: 160px;
+        height: 160px;
+    }
+
+    .home-side-glow {
+        width: 300px;
+        height: 300px;
+    }
+
+    .home-side-left {
+        left: -240px;
+    }
+
+    .home-side-right {
+        right: -230px;
+    }
+}
+
+
+/* =========================================================
+   EXPERIENCE RP — ADVANCED CIRCULAR CURSOR
+   ========================================================= */
+
+* {
+    cursor: none !important;
+}
+
+html,
+body {
+    cursor: none !important;
+}
+
+/* =========================================================
+   MAIN CURSOR
+   ========================================================= */
+
+.exp-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 38px;
+    height: 38px;
+
+    pointer-events: none;
+    z-index: 999999;
+
+    transform: translate3d(-50%, -50%, 0);
+
+    will-change: transform;
+
+    transition: opacity .2s ease;
+}
+
+/* =========================================================
+   MAIN CIRCLE
+   ========================================================= */
+
+.exp-cursor-arrow {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: 32px;
+    height: 32px;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    /* Remove dark card */
+    background: transparent;
+
+    /* Outer halo only */
+    border: 1.5px solid rgba(255, 208, 0, .9);
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 0 6px rgba(255, 208, 0, .9),
+        0 0 14px rgba(255, 208, 0, .45),
+        0 0 25px rgba(255, 208, 0, .18);
+
+    transition:
+        transform .3s cubic-bezier(.16, 1, .3, 1),
+        width .3s ease,
+        height .3s ease,
+        box-shadow .3s ease;
+}
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+.exp-cursor-logo {
+    position: absolute;
+
+    width: 15px;
+    height: 15px;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    object-fit: contain;
+
+    z-index: 3;
+
+    filter:
+        brightness(0)
+        saturate(100%)
+        invert(78%)
+        sepia(100%)
+        saturate(1200%)
+        hue-rotate(5deg)
+        brightness(105%)
+        contrast(105%)
+        drop-shadow(0 0 3px #ffd000)
+        drop-shadow(0 0 7px rgba(255, 208, 0, .8));
+
+    opacity: 1;
+
+    transition:
+        transform .3s cubic-bezier(.16, 1, .3, 1),
+        filter .3s ease;
+}
+
+/* =========================================================
+   CENTER GLOW
+   ========================================================= */
+
+.exp-cursor-glow {
+    position: absolute;
+
+    width: 75px;
+    height: 75px;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle,
+        rgba(255, 208, 0, .16) 0%,
+        rgba(255, 208, 0, .07) 30%,
+        transparent 70%
+    );
+
+    opacity: .65;
+
+    transition:
+        width .3s ease,
+        height .3s ease,
+        opacity .3s ease;
+}
+
+/* =========================================================
+   HOVER RING
+   ========================================================= */
+
+.exp-cursor-ring {
+    position: absolute;
+
+    width: 48px;
+    height: 48px;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border: 1px solid rgba(255, 208, 0, .5);
+
+    border-radius: 50%;
+
+    opacity: 0;
+
+    box-sizing: border-box;
+
+    transition:
+        width .4s cubic-bezier(.16, 1, .3, 1),
+        height .4s cubic-bezier(.16, 1, .3, 1),
+        opacity .25s ease,
+        border-color .25s ease;
+}
+
+/* Hover */
+.exp-cursor.hover .exp-cursor-ring {
+    width: 58px;
+    height: 58px;
+
+    opacity: 1;
+
+    border-color: rgba(255, 208, 0, .85);
+
+    animation: expHoverRotate 3s linear infinite;
+}
+
+@keyframes expHoverRotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+.exp-cursor.hover .exp-cursor-arrow {
+    width: 36px;
+    height: 36px;
+
+    box-shadow:
+        0 0 6px #ffd000,
+        0 0 15px rgba(255, 208, 0, .75),
+        0 0 28px rgba(255, 208, 0, .35),
+        inset 0 0 10px rgba(255, 208, 0, .18);
+}
+
+.exp-cursor.hover .exp-cursor-logo {
+    transform: translate(-50%, -50%) scale(1.12);
+
+    filter:
+        brightness(0)
+        saturate(100%)
+        invert(78%)
+        sepia(100%)
+        saturate(1400%)
+        hue-rotate(5deg)
+        brightness(115%)
+        contrast(110%)
+
+        drop-shadow(0 0 4px #ffd000)
+        drop-shadow(0 0 10px #ffd000);
+}
+
+.exp-cursor.hover .exp-cursor-glow {
+    width: 90px;
+    height: 90px;
+
+    opacity: .85;
+}
+
+/* =========================================================
+   TRAIL
+   ========================================================= */
+
+.exp-trail {
+    position: fixed;
+
+    pointer-events: none;
+
+    z-index: 999990;
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #ffd000;
+
+    box-shadow:
+        0 0 5px #ffd000,
+        0 0 12px #ffd000,
+        0 0 22px rgba(255, 208, 0, .55);
+
+    transform: translate(-50%, -50%);
+
+    animation:
+        expTrailFade .65s ease-out forwards;
+}
+
+@keyframes expTrailFade {
+    0% {
+        opacity: .8;
+
+        transform:
+            translate(-50%, -50%)
+            scale(1);
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            translate(-50%, -50%)
+            scale(.05);
+    }
+}
+
+/* =========================================================
+   PARTICLES
+   ========================================================= */
+
+.exp-particle {
+    position: fixed;
+
+    pointer-events: none;
+
+    z-index: 999989;
+
+    width: 3px;
+    height: 3px;
+
+    border-radius: 50%;
+
+    background: #ffd000;
+
+    box-shadow:
+        0 0 8px #ffd000,
+        0 0 14px rgba(255, 208, 0, .6);
+
+    animation:
+        expParticle .7s ease-out forwards;
+}
+
+@keyframes expParticle {
+    0% {
+        opacity: 1;
+
+        transform:
+            translate(0, 0)
+            scale(1);
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            translate(
+                calc((var(--random-x) - .5) * 45px),
+                calc((var(--random-y) - .5) * 45px)
+            )
+            scale(0);
+    }
+}
+
+/* =========================================================
+   CLICK RIPPLE
+   ========================================================= */
+
+.exp-click-ripple {
+    position: fixed;
+
+    pointer-events: none;
+
+    z-index: 999988;
+
+    width: 15px;
+    height: 15px;
+
+    border: 1.5px solid #ffd000;
+
+    border-radius: 50%;
+
+    transform: translate(-50%, -50%);
+
+    box-shadow:
+        0 0 8px #ffd000,
+        inset 0 0 8px rgba(255, 208, 0, .4);
+
+    animation:
+        expRipple .65s cubic-bezier(.16, 1, .3, 1) forwards;
+}
+
+@keyframes expRipple {
+    0% {
+        width: 12px;
+        height: 12px;
+
+        opacity: 1;
+    }
+
+    100% {
+        width: 90px;
+        height: 90px;
+
+        opacity: 0;
+    }
+}
+
+/* =========================================================
+   TEXT MODE
+   ========================================================= */
+
+.exp-cursor.text-mode .exp-cursor-arrow {
+    width: 5px;
+    height: 28px;
+
+    border-radius: 3px;
+
+    background: #ffd000;
+
+    border: none;
+
+    box-shadow:
+        0 0 6px #ffd000,
+        0 0 14px rgba(255, 208, 0, .7);
+}
+
+.exp-cursor.text-mode .exp-cursor-logo {
+    display: none;
+}
+
+.exp-cursor.text-mode .exp-cursor-ring {
+    display: none;
+}
+
+.exp-cursor.text-mode .exp-cursor-glow {
+    width: 45px;
+    height: 45px;
+
+    opacity: .3;
+}
+
+/* =========================================================
+   CLICK STATE
+   ========================================================= */
+
+.exp-cursor.clicking .exp-cursor-arrow {
+    width: 27px;
+    height: 27px;
+
+    box-shadow:
+        0 0 10px #ffd000,
+        0 0 25px rgba(255, 208, 0, .8),
+        inset 0 0 12px rgba(255, 208, 0, .25);
+}
+
+.exp-cursor.clicking .exp-cursor-logo {
+    transform:
+        translate(-50%, -50%)
+        scale(.88);
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (hover: none), (pointer: coarse) {
+
+    .exp-cursor,
+    .exp-trail,
+    .exp-particle,
+    .exp-click-ripple {
+        display: none !important;
+    }
+
+    *,
+    html,
+    body {
+        cursor: auto !important;
+    }
 }

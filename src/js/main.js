@@ -886,3 +886,309 @@ if (revealItems.length) {
 
     revealItems.forEach((item) => revealObserver.observe(item));
 }
+
+
+/* =========================================================
+   EXPERIENCE RP — ADVANCED CIRCULAR CURSOR
+   ========================================================= */
+
+(() => {
+
+    if (
+        window.matchMedia("(hover: none), (pointer: coarse)").matches
+    ) {
+        return;
+    }
+
+    /* =====================================================
+       CREATE CURSOR
+       ===================================================== */
+
+    const cursor = document.createElement("div");
+
+    cursor.className = "exp-cursor";
+
+    cursor.innerHTML = `
+        <div class="exp-cursor-glow"></div>
+
+        <div class="exp-cursor-ring"></div>
+
+        <div class="exp-cursor-arrow">
+            <img
+                class="exp-cursor-logo"
+                src="/images/logodis_cursor.png"
+                alt=""
+            />
+        </div>
+    `;
+
+    document.body.appendChild(cursor);
+
+
+    /* =====================================================
+       POSITION
+       ===================================================== */
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+
+    let cursorX = mouseX;
+    let cursorY = mouseY;
+
+    let lastTrail = 0;
+
+
+    document.addEventListener("mousemove", (e) => {
+
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+        const now = performance.now();
+
+        if (now - lastTrail > 25) {
+            createTrail(mouseX, mouseY);
+            lastTrail = now;
+        }
+    });
+
+
+    /* =====================================================
+       SMOOTH MOVEMENT
+       ===================================================== */
+
+    function animateCursor() {
+
+        cursorX += (mouseX - cursorX) * 0.20;
+        cursorY += (mouseY - cursorY) * 0.20;
+
+        cursor.style.transform =
+            `translate3d(${cursorX}px, ${cursorY}px, 0) translate(-50%, -50%)`;
+
+        requestAnimationFrame(animateCursor);
+    }
+
+    animateCursor();
+
+
+    /* =====================================================
+       TRAIL
+       ===================================================== */
+
+    function createTrail(x, y) {
+
+        const trail = document.createElement("div");
+
+        trail.className = "exp-trail";
+
+        const size = 3 + Math.random() * 5;
+
+        trail.style.width = `${size}px`;
+        trail.style.height = `${size}px`;
+
+        trail.style.left = `${x}px`;
+        trail.style.top = `${y}px`;
+
+        document.body.appendChild(trail);
+
+        setTimeout(() => {
+            trail.remove();
+        }, 700);
+
+
+        if (Math.random() > 0.72) {
+            createParticle(x, y);
+        }
+    }
+
+
+    /* =====================================================
+       PARTICLES
+       ===================================================== */
+
+    function createParticle(x, y) {
+
+        const particle = document.createElement("div");
+
+        particle.className = "exp-particle";
+
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+
+        particle.style.setProperty(
+            "--random-x",
+            Math.random()
+        );
+
+        particle.style.setProperty(
+            "--random-y",
+            Math.random()
+        );
+
+        document.body.appendChild(particle);
+
+        setTimeout(() => {
+            particle.remove();
+        }, 750);
+    }
+
+
+    /* =====================================================
+       HOVER
+       ===================================================== */
+
+    const hoverElements = `
+        a,
+        button,
+        [role="button"],
+        input[type="submit"],
+        input[type="button"],
+        .btn,
+        .button,
+        .nav-link,
+        .card,
+        .clickable
+    `;
+
+
+    document.addEventListener("mouseover", (e) => {
+
+        const target = e.target.closest(hoverElements);
+
+        if (target) {
+            cursor.classList.add("hover");
+            cursor.classList.remove("text-mode");
+        }
+
+    });
+
+
+    document.addEventListener("mouseout", (e) => {
+
+        const target = e.target.closest(hoverElements);
+
+        if (target) {
+            cursor.classList.remove("hover");
+        }
+
+    });
+
+
+    /* =====================================================
+       TEXT MODE
+       ===================================================== */
+
+    const textElements = `
+        p,
+        span,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        label
+    `;
+
+
+    document.addEventListener("mouseover", (e) => {
+
+        const text = e.target.closest(textElements);
+
+        if (text && !text.closest(hoverElements)) {
+
+            cursor.classList.add("text-mode");
+
+        }
+
+    });
+
+
+    document.addEventListener("mouseout", (e) => {
+
+        const text = e.target.closest(textElements);
+
+        if (text) {
+
+            cursor.classList.remove("text-mode");
+
+        }
+
+    });
+
+
+    /* =====================================================
+       CLICK
+       ===================================================== */
+
+    document.addEventListener("mousedown", (e) => {
+
+        cursor.classList.add("clicking");
+
+        createRipple(
+            e.clientX,
+            e.clientY
+        );
+
+    });
+
+
+    document.addEventListener("mouseup", () => {
+
+        cursor.classList.remove("clicking");
+
+    });
+
+
+    /* =====================================================
+       RIPPLE
+       ===================================================== */
+
+    function createRipple(x, y) {
+
+        const ripple = document.createElement("div");
+
+        ripple.className = "exp-click-ripple";
+
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+
+        document.body.appendChild(ripple);
+
+
+        for (let i = 0; i < 5; i++) {
+
+            setTimeout(() => {
+
+                createParticle(x, y);
+
+            }, i * 25);
+
+        }
+
+
+        setTimeout(() => {
+
+            ripple.remove();
+
+        }, 700);
+    }
+
+
+    /* =====================================================
+       WINDOW LEAVE / ENTER
+       ===================================================== */
+
+    document.addEventListener("mouseleave", () => {
+
+        cursor.style.opacity = "0";
+
+    });
+
+
+    document.addEventListener("mouseenter", () => {
+
+        cursor.style.opacity = "1";
+
+    });
+
+})();

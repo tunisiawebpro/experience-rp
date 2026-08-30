@@ -203,7 +203,7 @@ discordLoginBtn?.addEventListener(
     }
 );
 
-// Check persistent Discord session
+// Check the real session stored on Render
 const checkDiscordSession = async () => {
     try {
         const response = await fetch(
@@ -268,6 +268,7 @@ discordSignOut?.addEventListener(
         resetDiscordProfile();
     }
 );
+
 // ============================================
 // NAVIGATION TOGGLE (Mobile & Collapse)
 // ============================================

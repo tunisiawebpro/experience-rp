@@ -3,39 +3,699 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experience Roleplay Rules</title>
-    <link rel="icon" type="image/png" href="/images/logoex.png">
+
+    <title>Experience Roleplay — Rules</title>
+
+    <link rel="icon" type="image/png" href="/publics/images/logoex.png">
     <link rel="stylesheet" href="css/rules.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
+    >
 </head>
+
 <body>
+
+    <!-- =========================================
+         HIDDEN SVG — torn / burnt edge filters
+         Each filter jaggedly displaces whatever
+         shape it's applied to, so a plain rounded
+         rectangle comes out looking charred & torn.
+         ========================================= -->
+
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <defs>
+            <filter id="torn-edge-a" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.018 0.09" numOctaves="3" seed="4" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+            <filter id="torn-edge-b" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.022 0.1" numOctaves="3" seed="17" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="24" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+            <filter id="torn-edge-c" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.016 0.08" numOctaves="4" seed="29" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="22" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+
+            <!-- light hand-jitter, for the sketchy arrows -->
+            <filter id="sketch-wobble" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="8" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+
+            <marker id="arrow-head" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 Z" fill="currentColor"/>
+            </marker>
+        </defs>
+    </svg>
+
+    <!-- =========================================
+         BACKGROUND
+         ========================================= -->
+
     <div class="background"></div>
     <div class="dark-overlay"></div>
-    <div class="stars"></div>
+
+    <!-- Animated atmosphere -->
+    <div class="stars" aria-hidden="true"></div>
     <div class="floating-points" aria-hidden="true"></div>
 
+    <!-- Gold ambient arcs -->
+    <div class="ambient ambient-left" aria-hidden="true"></div>
+    <div class="ambient ambient-right" aria-hidden="true"></div>
+
+
     <main>
+
+        <!-- =========================================
+             HEADER
+             ========================================= -->
+
         <header class="rules-header">
-            <div class="header-logo">
+
+            <a href="index.html" class="header-logo">
                 <img src="/images/logodis.png" alt="Experience RP">
-            </div>
+            </a>
+
             <div class="header-text">
-                <h1>Experience Roleplay Rules</h1>
-                <p>Hover over a rule to see their definition</p>
+
+                <span class="eyebrow">
+                    EXPERIENCE RP
+                </span>
+
+                <h1>
+                    City <span>Law</span>
+                </h1>
+
+                <p>
+                    PLAY FAIR. RESPECT OTHERS. ENJOY THE
+                    <strong>EXPERIENCE.</strong>
+                </p>
+
             </div>
-            <a href="index.html" class="rules-home-button"><i class="fas fa-house"></i><span>Home</span></a>
+
+            <a href="index.html" class="rules-home-button">
+                <i class="fas fa-house"></i>
+                <span>Home</span>
+            </a>
+
         </header>
 
-        <section class="rules-grid">
-            <article class="rule-card"><div class="card-content"><div class="rule-number">01</div><h2>Vehicle DeathMatch</h2></div><div class="rule-definition"><span>DEFINITION</span><h3>Vehicle DeathMatch</h3><p>Using a vehicle to intentionally harm another player without a valid roleplay reason.</p></div></article>
-            <article class="rule-card"><div class="card-content"><div class="rule-number">02</div><h2>Power Gaming</h2></div><div class="rule-definition"><span>DEFINITION</span><h3>Power Gaming</h3><p>Forcing actions onto your character or doing unrealistic actions without proper roleplay.</p></div></article>
-            <article class="rule-card"><div class="card-content"><div class="rule-number">03</div><h2>Mass RP</h2></div><div class="rule-definition"><span>DEFINITION</span><h3>Mass RP</h3><p>Always remember that the city is populated and act realistically in public situations.</p></div></article>
-            <article class="rule-card"><div class="card-content"><div class="rule-number">04</div><h2>Mix RP</h2></div><div class="rule-definition"><span>DEFINITION</span><h3>Mix RP</h3><p>Do not mix out-of-character information with your in-character roleplay.</p></div></article>
-            <article class="rule-card"><div class="card-content"><div class="rule-number">05</div><h2>Combat Logging</h2></div><div class="rule-definition"><span>DEFINITION</span><h3>Combat Logging</h3><p>Leaving the server to avoid an active roleplay situation is not allowed.</p></div></article>
-            <article class="rule-card"><div class="card-content"><div class="rule-number">06</div><h2>Value Of Life</h2></div><div class="rule-definition"><span>DEFINITION</span><h3>Value Of Life</h3><p>Always value your character's life and react realistically during dangerous situations.</p></div></article>
+
+        <!-- =========================================
+             INTRO
+             ========================================= -->
+
+        <section class="rules-intro">
+
+            <p>
+                Experience RolePlay has no restrictions;
+                simply observe these <strong>five core rules</strong>.
+            </p>
+
+            <div class="intro-line">
+                <span></span>
+                <i class="fas fa-diamond"></i>
+                <span></span>
+            </div>
+
         </section>
+
+
+        <!-- =========================================
+             RULES
+             ========================================= -->
+
+        <section class="rules-list">
+
+            <!-- RULE 01 -->
+
+            <div class="rule-file">
+            <svg class="evidence-arrow arrow-left" viewBox="0 0 62 44" aria-hidden="true">
+                <path d="M4 24 C 20 12, 34 36, 56 20" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-head)"/>
+            </svg>
+            <article class="rule-card">
+
+                <div class="rule-number">
+                    <span>01</span>
+                </div>
+
+                <div class="rule-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+
+                <div class="rule-content">
+
+                    <div class="rule-label">
+                        CORE RULE
+                    </div>
+
+                    <h2>
+                        Lore RP
+                    </h2>
+
+                    <p>
+                        Respect the server's lore, storyline, factions,
+                        and world-building. Your character must fit
+                        naturally within the universe of Experience RP.
+                    </p>
+
+                </div>
+
+                <div class="rule-mark">
+                    <i class="fas fa-scroll"></i>
+                </div>
+
+            </article>
+            <div class="blood-drips" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+            </div>
+
+
+            <!-- RULE 02 -->
+
+            <div class="rule-file">
+            <svg class="evidence-arrow arrow-right" viewBox="0 0 62 44" aria-hidden="true">
+                <path d="M58 20 C 42 8, 28 32, 6 16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-head)"/>
+            </svg>
+            <article class="rule-card">
+
+                <div class="rule-number">
+                    <span>02</span>
+                </div>
+
+                <div class="rule-icon">
+                    <i class="fas fa-masks-theater"></i>
+                </div>
+
+                <div class="rule-content">
+
+                    <div class="rule-label">
+                        CORE RULE
+                    </div>
+
+                    <h2>
+                        Quality RP
+                    </h2>
+
+                    <p>
+                        Every interaction should contribute to the roleplay.
+                        Avoid low-effort, troll, or unrealistic RP that
+                        negatively affects the experience of others.
+                    </p>
+
+                </div>
+
+                <div class="rule-mark">
+                    <i class="fas fa-star"></i>
+                </div>
+
+            </article>
+            <div class="blood-drips" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+            </div>
+
+
+            <!-- RULE 03 -->
+
+            <div class="rule-file">
+            <svg class="evidence-arrow arrow-left" viewBox="0 0 62 44" aria-hidden="true">
+                <path d="M4 18 C 22 30, 32 8, 56 22" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-head)"/>
+            </svg>
+            <article class="rule-card">
+
+                <div class="rule-number">
+                    <span>03</span>
+                </div>
+
+                <div class="rule-icon">
+                    <i class="fas fa-scale-balanced"></i>
+                </div>
+
+                <div class="rule-content">
+
+                    <div class="rule-label">
+                        CORE RULE
+                    </div>
+
+                    <h2>
+                        Logic RP
+                    </h2>
+
+                    <p>
+                        Use common sense and realistic decision-making.
+                        Your character's actions must make sense within
+                        the situation and carry believable consequences.
+                    </p>
+
+                </div>
+
+                <div class="rule-mark">
+                    <i class="fas fa-brain"></i>
+                </div>
+
+            </article>
+            <div class="blood-drips" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+            </div>
+
+
+            <!-- RULE 04 -->
+
+            <div class="rule-file">
+            <svg class="evidence-arrow arrow-right" viewBox="0 0 62 44" aria-hidden="true">
+                <path d="M56 26 C 40 38, 30 6, 6 20" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-head)"/>
+            </svg>
+            <article class="rule-card">
+
+                <div class="rule-number">
+                    <span>04</span>
+                </div>
+
+                <div class="rule-icon">
+                    <i class="fas fa-user-secret"></i>
+                </div>
+
+                <div class="rule-content">
+
+                    <div class="rule-label">
+                        CORE RULE
+                    </div>
+
+                    <h2>
+                        No Metagaming
+                    </h2>
+
+                    <p>
+                        Do not use information obtained outside of RP
+                        to influence your character's decisions,
+                        actions, or knowledge in-game.
+                    </p>
+
+                </div>
+
+                <div class="rule-mark">
+                    <i class="fas fa-eye-slash"></i>
+                </div>
+
+            </article>
+            <div class="blood-drips" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+            </div>
+
+
+            <!-- RULE 05 -->
+
+            <div class="rule-file">
+            <svg class="evidence-arrow arrow-left" viewBox="0 0 62 44" aria-hidden="true">
+                <path d="M4 22 C 18 8, 36 34, 56 18" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" marker-end="url(#arrow-head)"/>
+            </svg>
+            <article class="rule-card">
+
+                <div class="rule-number">
+                    <span>05</span>
+                </div>
+
+                <div class="rule-icon">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+
+                <div class="rule-content">
+
+                    <div class="rule-label">
+                        CORE RULE
+                    </div>
+
+                    <h2>
+                        No Exploits
+                    </h2>
+
+                    <p>
+                        No duping, glitching, hacking, or exploiting bugs.
+                        Any discovered exploit must be reported to the
+                        staff team immediately.
+                    </p>
+
+                </div>
+
+                <div class="rule-mark">
+                    <i class="fas fa-ban"></i>
+                </div>
+
+            </article>
+            <div class="blood-drips" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+            </div>
+
+        </section>
+
+        <!-- =========================================
+     FIELD TEST — RP RULES QUIZ
+     ========================================= -->
+
+<section class="field-test" id="fieldTest">
+
+    <!-- INTRO SCREEN -->
+    <div class="field-test-intro" id="quizIntro">
+
+        <div class="field-test-stamp">
+            <span>EXPERIENCE RP</span>
+            <strong>FIELD TEST</strong>
+        </div>
+
+        <div class="field-test-icon">
+            <i class="fas fa-crosshairs"></i>
+        </div>
+
+        <div class="field-test-heading">
+            <span class="field-test-eyebrow">
+                RULE AWARENESS PROTOCOL
+            </span>
+
+            <h2>
+                Can You Handle<br>
+                <span>the Experience?</span>
+            </h2>
+
+            <p>
+                Five situations.
+                Five decisions.
+                Trust your instincts.
+            </p>
+        </div>
+
+        <div class="field-test-meta">
+
+            <div class="test-meta-item">
+                <i class="fas fa-layer-group"></i>
+                <span>05 SCENARIOS</span>
+            </div>
+
+            <div class="test-meta-divider"></div>
+
+            <div class="test-meta-item">
+                <i class="fas fa-bolt"></i>
+                <span>QUICK DECISIONS</span>
+            </div>
+
+            <div class="test-meta-divider"></div>
+
+            <div class="test-meta-item">
+                <i class="fas fa-shield-halved"></i>
+                <span>RULE BASED</span>
+            </div>
+
+        </div>
+
+        <button class="field-test-start" id="startQuiz" type="button">
+            <span>START FIELD TEST</span>
+            <i class="fas fa-arrow-right"></i>
+        </button>
+
+        <div class="field-test-note">
+            <i class="fas fa-circle-info"></i>
+            No timer. No pressure. Just make the right call.
+        </div>
+
+    </div>
+
+
+    <!-- QUIZ SCREEN -->
+    <div class="field-test-game" id="quizGame" hidden>
+
+        <!-- TOP BAR -->
+        <div class="quiz-topbar">
+
+            <div class="quiz-status">
+                <span class="quiz-status-dot"></span>
+                <span>FIELD TEST ACTIVE</span>
+            </div>
+
+            <div class="quiz-counter">
+                <span id="currentQuestion">01</span>
+                <span class="quiz-counter-separator">/</span>
+                <span>05</span>
+            </div>
+
+        </div>
+
+
+        <!-- PROGRESS -->
+        <div class="quiz-progress-wrap">
+
+            <div class="quiz-progress-track">
+                <div
+                    class="quiz-progress-bar"
+                    id="quizProgressBar"
+                ></div>
+            </div>
+
+            <div class="quiz-progress-dots" id="quizProgressDots">
+
+                <span class="progress-dot active"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+
+            </div>
+
+        </div>
+
+
+        <!-- SCENARIO -->
+        <div class="quiz-scenario">
+
+            <div class="scenario-header">
+
+                <div class="scenario-tag">
+                    <i class="fas fa-file-lines"></i>
+                    <span id="scenarioRule">RULE 04 — METAGAMING</span>
+                </div>
+
+                <div class="scenario-number">
+                    CASE <span id="scenarioNumber">01</span>
+                </div>
+
+            </div>
+
+
+            <div class="scenario-content">
+
+                <div class="scenario-symbol">
+                    <i id="scenarioIcon" class="fas fa-user-secret"></i>
+                </div>
+
+                <div class="scenario-text">
+
+                    <span class="scenario-label">
+                        FIELD SCENARIO
+                    </span>
+
+                    <h3 id="scenarioTitle">
+                        Situation detected.
+                    </h3>
+
+                    <p id="scenarioDescription">
+                        Loading scenario...
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ANSWERS -->
+            <div
+                class="quiz-options"
+                id="quizOptions"
+            ></div>
+
+
+            <!-- FEEDBACK -->
+            <div
+                class="quiz-feedback"
+                id="quizFeedback"
+                hidden
+            >
+
+                <div class="feedback-icon" id="feedbackIcon">
+                    <i class="fas fa-check"></i>
+                </div>
+
+                <div class="feedback-content">
+
+                    <span
+                        class="feedback-title"
+                        id="feedbackTitle"
+                    >
+                        GOOD CALL
+                    </span>
+
+                    <p id="feedbackText">
+                        You made the right decision.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- NEXT -->
+            <button
+                class="quiz-next"
+                id="nextQuestion"
+                type="button"
+                hidden
+            >
+                <span id="nextQuestionText">
+                    NEXT SCENARIO
+                </span>
+
+                <i class="fas fa-arrow-right"></i>
+            </button>
+
+        </div>
+
+
+        <!-- QUIZ FOOT -->
+        <div class="quiz-footer">
+
+            <div class="quiz-score">
+                <span>SCORE</span>
+                <strong id="quizScore">00</strong>
+            </div>
+
+            <div class="quiz-combo" id="quizCombo">
+                <i class="fas fa-bolt"></i>
+                <span>COMBO ×0</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RESULT SCREEN -->
+    <div class="field-test-result" id="quizResult" hidden>
+
+        <div class="result-stamp">
+            <span>EXPERIENCE RP</span>
+            <strong>FIELD TEST</strong>
+            <small>COMPLETE</small>
+        </div>
+
+        <div class="result-icon" id="resultIcon">
+            <i class="fas fa-shield-halved"></i>
+        </div>
+
+        <span class="result-eyebrow">
+            RULE AWARENESS REPORT
+        </span>
+
+        <h2 id="resultTitle">
+            READY TO PLAY
+        </h2>
+
+        <p class="result-subtitle" id="resultSubtitle">
+            Your instincts are solid.
+        </p>
+
+
+        <div class="result-score">
+
+            <strong id="finalScore">
+                05
+            </strong>
+
+            <span>/ 05</span>
+
+        </div>
+
+
+        <div class="result-bar">
+
+            <div
+                class="result-bar-fill"
+                id="resultBarFill"
+            ></div>
+
+        </div>
+
+        <div class="result-percentage">
+            <span id="resultPercentage">100%</span>
+            RULE AWARENESS
+        </div>
+
+
+        <!-- RULE RESULTS -->
+        <div class="result-rules" id="resultRules"></div>
+
+
+        <!-- RESULT ACTIONS -->
+        <div class="result-actions">
+
+            <button
+                class="result-restart"
+                id="restartQuiz"
+                type="button"
+            >
+                <i class="fas fa-rotate-right"></i>
+                <span>RUN TEST AGAIN</span>
+            </button>
+
+            <button
+                class="result-rules-button"
+                id="returnToRules"
+                type="button"
+            >
+                <i class="fas fa-book-open"></i>
+                <span>RETURN TO RULES</span>
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+        <!-- =========================================
+             FOOTER MESSAGE
+             ========================================= -->
+
+        <section class="rules-footer">
+
+            <div class="footer-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+
+            <p>
+                Respect the rules.
+                <span>Shape the story.</span>
+                Enjoy the Experience.
+            </p>
+
+        </section>
+
     </main>
 
+
     <script type="module" src="js/floating-points.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/rules-quiz.js"></script>
+
 </body>
 </html>

@@ -65,14 +65,43 @@
                     </div>
                 </article>
                 <article class="story-event story-event-final">
-                    <div class="story-time">Twenty years later</div>
-                    <div class="story-marker"></div>
-                    <div class="story-event-body">
-                        <p class="story-kicker">Outside</p>
-                        <h3>A world no one remembers</h3>
-                        <p>Hundreds survived inside a nuclear bunker. Twenty years passed. When the vault finally opened, suited figures gave them one command: “It is time to go outside.” Beyond the hatch waited a ruined world, a secured zone and questions no one could answer.</p>
-                    </div>
-                </article>
+
+<div class="story-time">Twenty years later</div>
+
+<div class="story-marker"></div>
+
+<div class="story-event-body">
+
+    <p class="story-kicker">The vault opens</p>
+
+    <h3>Time to go outside</h3>
+
+    <p>
+        Twenty years after the disaster, the sealed vault door unexpectedly
+        unlocked. Hazard-suited figures entered the bunker and silently
+        observed the survivors before delivering a single command:
+        it was finally time to go outside.
+    </p>
+
+    <p>
+        The survivors were divided into groups and escorted through the
+        underground tunnels toward the surface. When they emerged, they
+        found a world beyond recognition — abandoned vehicles, ruined
+        buildings, dust-covered roads, and collapsed structures stretching
+        across the remains of the city.
+    </p>
+
+    <p>
+        Their mysterious guides led them toward a protected zone before
+        disappearing without explanation. No identities were revealed.
+        No answers were given. After twenty years underground, the
+        survivors were finally standing beneath an open sky, facing a
+        world they no longer recognized.
+    </p>
+
+</div>
+
+</article>
             </div>
 
             <div class="storyline-ending">
@@ -132,6 +161,38 @@
         window.addEventListener('pagehide', closeAtmosphere);
         document.addEventListener('pointerdown', playStorylineSound, { once: true });
         document.addEventListener('keydown', playStorylineSound, { once: true });
+
+        /* =========================================================
+   STORYLINE — SCROLL REVEAL
+   ========================================================= */
+
+const storyEvents = document.querySelectorAll(".story-event");
+
+const storyObserver = new IntersectionObserver(
+    (entries) => {
+
+        entries.forEach((entry) => {
+
+            if (entry.isIntersecting) {
+
+                entry.target.classList.add("story-visible");
+
+                storyObserver.unobserve(entry.target);
+            }
+
+        });
+
+    },
+    {
+        threshold: 0.18,
+        rootMargin: "0px 0px -60px 0px"
+    }
+);
+
+storyEvents.forEach((event) => {
+    storyObserver.observe(event);
+});
     </script>
+    <script type="module" src="/js/main.js"></script>
 </body>
 </html>
