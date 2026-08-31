@@ -3032,3 +3032,60 @@ body {
         cursor: auto !important;
     }
 }
+
+
+/* =========================================================
+   HOME PAGE — SAME EFFECT AS RULES PAGE
+   ========================================================= */
+
+#home,
+.ticker-divider,
+.signal-divider,
+.home-section,
+footer {
+    opacity: 0;
+    animation: homeSoftDrop 0.55s ease-out forwards;
+}
+
+#home {
+    animation-delay: 0.05s;
+}
+
+.ticker-divider {
+    animation-delay: 0.10s;
+}
+
+.signal-divider {
+    animation-delay: 0.14s;
+}
+
+.home-section {
+    animation-delay: 0.18s;
+}
+
+footer {
+    animation-delay: 0.22s;
+}
+
+@keyframes homeSoftDrop {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #home,
+    .ticker-divider,
+    .signal-divider,
+    .home-section,
+    footer {
+        opacity: 1;
+        animation: none;
+    }
+}

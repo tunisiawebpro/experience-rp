@@ -3338,3 +3338,50 @@ body {
 .result-rule-name {
     font-family: 'Space Mono', monospace;
 }
+
+
+/* =========================================================
+   PAGE ENTRY — SUBTLE DROP
+   ========================================================= */
+
+.rules-header,
+.rules-intro,
+.rules-list,
+.rules-quiz,
+.rules-footer {
+    opacity: 0;
+    animation: pageSectionDrop 0.55s ease-out forwards;
+}
+
+.rules-header {
+    animation-delay: 0.05s;
+}
+
+.rules-intro {
+    animation-delay: 0.12s;
+}
+
+.rules-list {
+    animation-delay: 0.18s;
+}
+
+.rules-quiz {
+    animation-delay: 0.24s;
+}
+
+.rules-footer {
+    animation-delay: 0.30s;
+}
+
+@keyframes pageSectionDrop {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
