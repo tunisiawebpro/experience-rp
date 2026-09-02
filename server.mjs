@@ -83,10 +83,16 @@ const resolveSurvivorsRoleId = async () => {
 };
 
 const userHasSurvivorsRole = async (userId) => {
-    if (!guildId || !botToken || !userId) return false;
+    if (!guildId || !botToken || !userId) {
+        console.log('Survivors check skipped:', { guildId: !!guildId, botToken: !!botToken, userId: !!userId });
+        return false;
+    }
 
     const resolvedRoleId = await resolveSurvivorsRoleId();
-    if (!resolvedRoleId) return false;
+    if (!resolvedRoleId) {
+        console.log('Survivors role not resolved:', { guildId, survivorsRoleId, survivorsRoleName });
+        return false;
+    }
 
     try {
         const response = await fetch(
@@ -98,10 +104,30 @@ const userHasSurvivorsRole = async (userId) => {
             }
         );
 
-        if (!response.ok) return false;
+        const text = await response.text();
 
-        const member = await response.json();
-        return Array.isArray(member.roles) && member.roles.includes(resolvedRoleId);
+        if (!response.ok) {
+            console.log('Guild member fetch failed:', {
+                status: response.status,
+                guildId,
+                userId,
+                responseText: text.slice(0, 500)
+            });
+            return false;
+        }
+
+        const member = JSON.parse(text);
+        const hasRole = Array.isArray(member.roles) && member.roles.includes(resolvedRoleId);
+
+        console.log('Guild member check:', {
+            guildId,
+            userId,
+            resolvedRoleId,
+            memberRoles: member.roles || [],
+            hasRole
+        });
+
+        return hasRole;
     } catch (error) {
         console.warn('Could not read guild member roles:', error);
         return false;
