@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "auth": "node --env-file=.env server.mjs",
+    "auth": "node server.mjs",
+    "auth:local": "node --env-file=.env server.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
