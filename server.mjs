@@ -7,8 +7,8 @@ const { Pool } = pg;
 
 const port = process.env.PORT || 3002;
 
-const websiteUrl = 'https://exp-rp.netlify.app';
-const backendUrl = process.env.BACKEND_URL;
+const websiteUrl = process.env.FRONTEND_URL || 'https://exp-rp.netlify.app';
+const backendUrl = process.env.BACKEND_URL || 'http://localhost:3002';
 
 const clientId = process.env.DISCORD_CLIENT_ID;
 const clientSecret = process.env.DISCORD_CLIENT_SECRET;
@@ -304,37 +304,48 @@ const server = http.createServer(async (request, response) => {
                 );
             }
 
-            // Add user to Discord server
-            const joinResponse = await fetch(
-                `https://discord.com/api/guilds/${guildId}/members/${user.id}`,
-                {
-                    method: 'PUT',
+            // Add user to Discord server (best effort only)
+            if (guildId && botToken) {
+                try {
+                    const joinResponse = await fetch(
+                        `https://discord.com/api/guilds/${guildId}/members/${user.id}`,
+                        {
+                            method: 'PUT',
 
-                    headers: {
-                        Authorization:
-                            `Bot ${botToken}`,
+                            headers: {
+                                Authorization:
+                                    `Bot ${botToken}`,
 
-                        'Content-Type':
-                            'application/json'
-                    },
+                                'Content-Type':
+                                    'application/json'
+                            },
 
-                    body: JSON.stringify({
-                        access_token:
-                            tokenData.access_token
-                    })
+                            body: JSON.stringify({
+                                access_token:
+                                    tokenData.access_token
+                            })
+                        }
+                    );
+
+                    if (
+                        !joinResponse.ok &&
+                        joinResponse.status !== 204
+                    ) {
+                        const joinError =
+                            await joinResponse.text();
+
+                        console.warn(
+                            'Could not auto-add user to Discord guild:',
+                            joinResponse.status,
+                            joinError
+                        );
+                    }
+                } catch (joinError) {
+                    console.warn(
+                        'Guild join request failed:',
+                        joinError
+                    );
                 }
-            );
-
-            if (
-                !joinResponse.ok &&
-                joinResponse.status !== 204
-            ) {
-                const joinError =
-                    await joinResponse.text();
-
-                throw new Error(
-                    `Could not add the account to the test server: ${joinError}`
-                );
             }
 
             // ============================================
