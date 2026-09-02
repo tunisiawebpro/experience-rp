@@ -261,6 +261,13 @@ const stopTypingSound = () => {
 // TYPING EFFECT
 // ============================================================
 
+const startEntranceSequence = () => {
+    if (!entranceParagraph || typingStarted) return;
+
+    unlockTypingSound();
+    typeEntranceText();
+};
+
 const typeEntranceText = () => {
 
     if (
@@ -339,9 +346,22 @@ const typeEntranceText = () => {
 // START TYPING
 // ============================================================
 
-// Start on PC and mobile
-typeEntranceText();
+// Start automatically on first real interaction so audio can unlock safely
+window.addEventListener('pointerdown', startEntranceSequence, { once: true });
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        startEntranceSequence();
+        enterWebsite();
+    } else {
+        unlockTypingSound();
+        if (!typingStarted) startEntranceSequence();
+    }
+}, { passive: true });
 
+// Keep the original auto-start for first load if the browser allows it
+if (!entranceWasSeen || isPageRefresh) {
+    startEntranceSequence();
+}
 
 
 // ============================================================
@@ -404,37 +424,15 @@ const enterWebsite = () => {
 
 
 // ============================================================
-// PC — ENTER
-// ============================================================
-
-document.addEventListener('keydown', (event) => {
-
-    if (event.key === 'Enter') {
-
-        enterWebsite();
-
-    } else {
-
-        unlockTypingSound();
-
-    }
-
-});
-
-
-
-// ============================================================
 // PHONE — TAP
 // ============================================================
 
 entranceScreen?.addEventListener(
     'touchstart',
     () => {
-
-        // One tap = enter
-        // Audio + typing stop immediately
+        unlockTypingSound();
+        if (!typingStarted) startEntranceSequence();
         enterWebsite();
-
     },
     { passive: true }
 );
