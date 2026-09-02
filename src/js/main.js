@@ -444,6 +444,9 @@ entranceScreen?.addEventListener(
 const discordLoginBtn = document.getElementById('discordLoginBtn');
 const discordAccountMenu = document.getElementById('discordAccountMenu');
 const discordSignOut = document.getElementById('discordSignOut');
+const serverConnectBtn = document.getElementById('serverConnectBtn');
+const serverAccessNotice = document.getElementById('serverAccessNotice');
+const serverIpCard = document.getElementById('serverIpCard');
 
 const discordAuthUrl =
     'https://exp-rp-backend.onrender.com/auth/discord';
@@ -453,6 +456,20 @@ const discordApiUrl =
 
     const discordProfileStorageKey =
     'experience-rp-discord-profile';
+
+const applyServerAccessState = (hasAccess) => {
+    if (serverConnectBtn) {
+        serverConnectBtn.classList.toggle('hidden', !hasAccess);
+    }
+
+    if (serverAccessNotice) {
+        serverAccessNotice.classList.toggle('hidden', hasAccess);
+    }
+
+    if (serverIpCard) {
+        serverIpCard.classList.toggle('hidden', !hasAccess);
+    }
+};
 
 const renderDiscordProfile = (profile) => {
     if (!profile?.username || !discordLoginBtn) return;
@@ -528,6 +545,7 @@ const checkDiscordSession = async () => {
 
     const connectedUsername = params.get('username');
     const connectedAvatar = params.get('avatar');
+    const hasSurvivorsRole = params.get('survivors') === 'true';
 
     if (
         params.get('discord') === 'connected' &&
@@ -535,7 +553,8 @@ const checkDiscordSession = async () => {
     ) {
         const profile = {
             username: connectedUsername,
-            avatar: connectedAvatar || ''
+            avatar: connectedAvatar || '',
+            hasSurvivorsRole
         };
 
         localStorage.setItem(
@@ -544,8 +563,9 @@ const checkDiscordSession = async () => {
         );
 
         renderDiscordProfile(profile);
+        applyServerAccessState(hasSurvivorsRole);
 
-        // Remove ?discord=...&username=...&avatar=...
+        // Remove ?discord=...&username=...&avatar=...&survivors=...
         // from the URL
         window.history.replaceState(
             {},
@@ -564,6 +584,7 @@ const checkDiscordSession = async () => {
 
         if (savedProfile?.username) {
             renderDiscordProfile(savedProfile);
+            applyServerAccessState(!!savedProfile.hasSurvivorsRole);
             return;
         }
     } catch {
@@ -589,7 +610,8 @@ const checkDiscordSession = async () => {
         if (data.authenticated && data.user) {
             const profile = {
                 username: data.user.username,
-                avatar: data.user.avatar || ''
+                avatar: data.user.avatar || '',
+                hasSurvivorsRole: !!data.user.hasSurvivorsRole
             };
 
             localStorage.setItem(
@@ -598,6 +620,9 @@ const checkDiscordSession = async () => {
             );
 
             renderDiscordProfile(profile);
+            applyServerAccessState(!!data.user.hasSurvivorsRole);
+        } else {
+            applyServerAccessState(false);
         }
     } catch (error) {
         console.error(

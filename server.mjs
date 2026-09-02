@@ -14,6 +14,8 @@ const clientId = process.env.DISCORD_CLIENT_ID;
 const clientSecret = process.env.DISCORD_CLIENT_SECRET;
 const botToken = process.env.DISCORD_BOT_TOKEN;
 const guildId = process.env.DISCORD_GUILD_ID;
+const survivorsRoleId = process.env.DISCORD_SURVIVORS_ROLE_ID;
+const survivorsRoleName = (process.env.DISCORD_SURVIVORS_ROLE_NAME || 'Survivors').trim().toLowerCase();
 
 const redirectUri = `${backendUrl}/auth/discord/callback`;
 const pool = new Pool({
@@ -52,7 +54,61 @@ const send = (response, status, body) => {
     response.end(body);
 };
 
-const createSession = async (user) => {
+const resolveSurvivorsRoleId = async () => {
+    if (survivorsRoleId) return survivorsRoleId;
+    if (!guildId || !botToken) return null;
+
+    try {
+        const response = await fetch(
+            `https://discord.com/api/guilds/${guildId}/roles`,
+            {
+                headers: {
+                    Authorization: `Bot ${botToken}`
+                }
+            }
+        );
+
+        if (!response.ok) return null;
+
+        const roles = await response.json();
+        const match = roles.find((role) =>
+            (role.name || '').trim().toLowerCase() === survivorsRoleName
+        );
+
+        return match?.id || null;
+    } catch (error) {
+        console.warn('Could not resolve Survivors role id:', error);
+        return null;
+    }
+};
+
+const userHasSurvivorsRole = async (userId) => {
+    if (!guildId || !botToken || !userId) return false;
+
+    const resolvedRoleId = await resolveSurvivorsRoleId();
+    if (!resolvedRoleId) return false;
+
+    try {
+        const response = await fetch(
+            `https://discord.com/api/guilds/${guildId}/members/${userId}`,
+            {
+                headers: {
+                    Authorization: `Bot ${botToken}`
+                }
+            }
+        );
+
+        if (!response.ok) return false;
+
+        const member = await response.json();
+        return Array.isArray(member.roles) && member.roles.includes(resolvedRoleId);
+    } catch (error) {
+        console.warn('Could not read guild member roles:', error);
+        return false;
+    }
+};
+
+const createSession = async (user, hasSurvivorsRole = false) => {
     const sessionId = crypto.randomBytes(32).toString('hex');
 
     const username = user.global_name || user.username;
@@ -89,14 +145,15 @@ const createSession = async (user) => {
     await pool.query(
         `
         INSERT INTO discord_sessions
-        (session_id, discord_id, username, avatar, created_at, expires_at)
-        VALUES ($1, $2, $3, $4, NOW(), NOW() + INTERVAL '30 days')
+        (session_id, discord_id, username, avatar, has_survivors_role, created_at, expires_at)
+        VALUES ($1, $2, $3, $4, $5, NOW(), NOW() + INTERVAL '30 days')
         `,
         [
             sessionId,
             user.id,
             username,
-            avatar
+            avatar,
+            hasSurvivorsRole
         ]
     );
 
@@ -108,7 +165,7 @@ const getSession = async (sessionId) => {
 
     const result = await pool.query(
         `
-        SELECT discord_id, username, avatar
+        SELECT discord_id, username, avatar, has_survivors_role
         FROM discord_sessions
         WHERE session_id = $1
         AND expires_at > NOW()
@@ -304,6 +361,8 @@ const server = http.createServer(async (request, response) => {
                 );
             }
 
+            const hasSurvivorsRole = await userHasSurvivorsRole(user.id);
+
             // Add user to Discord server (best effort only)
             if (guildId && botToken) {
                 try {
@@ -353,7 +412,7 @@ const server = http.createServer(async (request, response) => {
             // ============================================
 
             const sessionId =
-                await createSession(user);
+                await createSession(user, hasSurvivorsRole);
 
             response.setHeader('Set-Cookie', [
                 `session_id=${sessionId}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=2592000`
@@ -367,7 +426,8 @@ const avatarUrl = user.avatar
 const profileParams = new URLSearchParams({
     discord: 'connected',
     username: user.global_name || user.username,
-    avatar: avatarUrl
+    avatar: avatarUrl,
+    survivors: String(hasSurvivorsRole)
 });
 
 response.writeHead(302, {
@@ -424,7 +484,8 @@ response.end();
                 user: {
                     id: session.discord_id,
                     username: session.username,
-                    avatar: session.avatar
+                    avatar: session.avatar,
+                    hasSurvivorsRole: !!session.has_survivors_role
                 }
             });
 
@@ -507,6 +568,7 @@ const initializeDatabase = async () => {
             discord_id TEXT NOT NULL,
             username TEXT NOT NULL,
             avatar TEXT,
+            has_survivors_role BOOLEAN NOT NULL DEFAULT FALSE,
             created_at TIMESTAMP NOT NULL DEFAULT NOW(),
             expires_at TIMESTAMP NOT NULL
         )

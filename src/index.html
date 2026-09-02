@@ -147,11 +147,14 @@
                     </p>
 
                     <div class="flex flex-wrap gap-4">
-                        <a href="fivem://connect/89.42.88.45:30120" class="group px-10 py-4 rounded-xl bg-gradient-to-r from-[#FFD700] to-[#FFA500] hover:scale-105 transition-all duration-300 font-bold text-black flex items-center gap-3 shadow-lg shadow-[#FFD700]/25">
+                        <a id="serverConnectBtn" href="fivem://connect/89.42.88.45:30120" class="group px-10 py-4 rounded-xl bg-gradient-to-r from-[#FFD700] to-[#FFA500] hover:scale-105 transition-all duration-300 font-bold text-black flex items-center gap-3 shadow-lg shadow-[#FFD700]/25 hidden">
                             <i class="fas fa-plug"></i>
                             Connect Now
                             <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                         </a>
+                        <div id="serverAccessNotice" class="px-4 py-3 rounded-xl border border-[#FFD700]/30 bg-black/40 text-[#FFD700] text-sm hidden">
+                            Survivors role required to access the server IP.
+                        </div>
                         <a href="storyline.html" class="px-8 py-4 rounded-xl border border-[#FFD700]/40 hover:border-[#FFD700] hover:bg-[#FFD700]/10 transition-all duration-300 font-semibold text-white flex items-center gap-2">
                             <i class="fas fa-book-open text-[#FFD700]"></i>
                             Discover the Story
@@ -261,7 +264,7 @@
     </a>
 </article>
 
-                <article class="join-card join-card-final group">
+                <article id="serverIpCard" class="join-card join-card-final group hidden">
     <div class="join-card-top">
         <span class="join-step">03</span>
         <span class="join-status">You are ready</span>
