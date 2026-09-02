@@ -575,6 +575,11 @@ const initializeDatabase = async () => {
     `);
 
     await pool.query(`
+        ALTER TABLE discord_sessions
+        ADD COLUMN IF NOT EXISTS has_survivors_role BOOLEAN NOT NULL DEFAULT FALSE
+    `);
+
+    await pool.query(`
         DELETE FROM discord_sessions
         WHERE expires_at <= NOW()
     `);
