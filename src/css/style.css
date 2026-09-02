@@ -457,6 +457,59 @@
         gap: 0.85rem;
     }
 
+    .staff-groups {
+        display: grid;
+        gap: 3rem;
+    }
+
+    .staff-group {
+        position: relative;
+    }
+
+    .staff-group + .staff-group {
+        padding-top: 2.25rem;
+        border-top: 1px solid rgba(255, 215, 0, 0.16);
+    }
+
+    .staff-group-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .staff-group-index {
+        color: rgba(255, 215, 0, 0.55);
+        font-family: 'Space Mono', monospace;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .staff-group-kicker,
+    .staff-group-count {
+        display: block;
+        color: #6b7280;
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    .staff-group-heading h3 {
+        margin-top: 0.2rem;
+        color: #fff;
+        font-family: 'Cinzel', serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+    }
+
+    .staff-group-count {
+        margin-left: auto;
+        padding-left: 1rem;
+        border-left: 1px solid rgba(255, 255, 255, 0.12);
+        white-space: nowrap;
+    }
+
     .staff-member {
         display: flex;
         min-height: 5.25rem;
@@ -500,7 +553,7 @@
         box-shadow: 0 0 1rem rgba(255, 215, 0, 0.12);
     }
 
-    .staff-member h3 {
+    .staff-member h4 {
         overflow-wrap: anywhere;
         color: #fff;
         font-size: 0.95rem;
@@ -534,6 +587,8 @@
         .staff-featured-content h3 { font-size: 2.2rem; }
         .staff-metrics { gap: 1rem; }
         .staff-directory { grid-template-columns: 1fr; }
+        .staff-group-heading { align-items: flex-start; }
+        .staff-group-count { margin-top: 0.1rem; }
     }
 
     @media (min-width: 641px) and (max-width: 900px) {
