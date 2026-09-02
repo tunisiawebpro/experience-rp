@@ -513,6 +513,7 @@ const resetDiscordProfile = () => {
     discordAccountMenu?.setAttribute('hidden', '');
 
     discordLoginBtn?.classList.remove('is-connected');
+    applyServerAccessState(false);
 
     if (discordLoginBtn) {
         discordLoginBtn.innerHTML = `
@@ -654,6 +655,7 @@ discordSignOut?.addEventListener('click', async () => {
     );
 
     resetDiscordProfile();
+    applyServerAccessState(false);
 });
 
 // ============================================
