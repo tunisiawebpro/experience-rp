@@ -1398,7 +1398,8 @@ main {
     }
 
     .header-logo img {
-        width: 95px;
+        width: 46px;
+        height: 46px;
     }
 
     .rules-home-button {
