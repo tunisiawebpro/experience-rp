@@ -444,7 +444,9 @@ const discordAccountMenu = document.getElementById('discordAccountMenu');
 const discordSignOut = document.getElementById('discordSignOut');
 const serverConnectBtn = document.getElementById('serverConnectBtn');
 const serverAccessNotice = document.getElementById('serverAccessNotice');
-const serverIpCard = document.getElementById('serverIpCard');
+const serverIpBtn = document.getElementById('serverIpBtn');
+const serverIpNotice = document.getElementById('serverIpNotice');
+const serverIpHref = serverIpBtn?.dataset.href;
 
 const discordAuthUrl =
     'https://exp-rp-backend.onrender.com/auth/discord';
@@ -464,10 +466,24 @@ const applyServerAccessState = (hasAccess) => {
         serverAccessNotice.classList.toggle('hidden', hasAccess);
     }
 
-    if (serverIpCard) {
-        serverIpCard.classList.toggle('hidden', !hasAccess);
+    if (serverIpBtn) {
+        serverIpBtn.toggleAttribute('aria-disabled', !hasAccess);
+        serverIpNotice?.toggleAttribute('hidden', hasAccess);
+
+        if (hasAccess) {
+            serverIpBtn.setAttribute('href', serverIpHref);
+        } else {
+            serverIpBtn.removeAttribute('href');
+        }
     }
 };
+
+serverIpBtn?.addEventListener('click', (event) => {
+    if (serverIpBtn.hasAttribute('aria-disabled')) {
+        event.preventDefault();
+        serverIpNotice?.removeAttribute('hidden');
+    }
+});
 
 const renderDiscordProfile = (profile) => {
     if (!profile?.username || !discordLoginBtn) return;

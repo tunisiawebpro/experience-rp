@@ -1,6 +1,6 @@
 const discordServerId = '1531222351918927983';
 const discordInviteCode = 'PSyquaZek';
-const fivemServerAddress = '89.42.88.45:30120';
+const fivemServerAddress = 'experiencechiirp.prime-filter.com:30120';
 
 function updateServerStatus(isOnline) {
     const statusText = document.getElementById('serverStatusText');

@@ -123,6 +123,25 @@
         border-color: rgba(255, 215, 0, 0.3);
     }
 
+    .join-card-foot[aria-disabled='true'] {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .server-role-notice {
+        margin-top: 0.75rem;
+        padding: 0.55rem 0.7rem;
+        border: 1px solid rgba(255, 215, 0, 0.35);
+        border-radius: 0.5rem;
+        background: rgba(255, 215, 0, 0.08);
+        color: #ffd700;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
     .join-card-top,
     .join-card-foot {
         display: flex;
@@ -1105,6 +1124,52 @@
     box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
 }
 
+.developer-credit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding-left: 0.9rem;
+    border-left: 1px solid rgba(255, 215, 0, 0.18);
+    white-space: nowrap;
+}
+
+.developer-credit-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #6b7280;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.developer-credit-label i {
+    color: #ffd700;
+    font-size: 0.65rem;
+}
+
+.developer-credit-names {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #e5e7eb;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.developer-credit-names span:not(.developer-credit-separator) {
+    transition: color 200ms ease;
+}
+
+.developer-credit:hover .developer-credit-names span:not(.developer-credit-separator) {
+    color: #ffd700;
+}
+
+.developer-credit-separator {
+    color: rgba(255, 215, 0, 0.45);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .skyline-container {
@@ -1113,13 +1178,24 @@
     .skyline-svg {
         height: 120px;
     }
+
+    .developer-credit {
+        padding-left: 0;
+        border-left: 0;
+    }
 }
 
 /* Storyline page */
 .storyline-page {
     min-width: 0;
     padding: 0;
-    background: #08090b;
+    background:
+        radial-gradient(circle at 50% 8%, rgba(126, 24, 12, 0.2), transparent 28rem),
+        radial-gradient(circle at 8% 52%, rgba(45, 58, 64, 0.16), transparent 24rem),
+        radial-gradient(circle at 92% 76%, rgba(92, 20, 12, 0.14), transparent 26rem),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 5px),
+        #08090b;
+    background-attachment: fixed;
     color: #f5f5f5;
 }
 
@@ -1151,6 +1227,8 @@
 }
 
 .storyline-page main {
+    position: relative;
+    z-index: 1;
     opacity: 0;
     transition: opacity 0.8s ease;
 }
@@ -1168,7 +1246,7 @@
     align-items: flex-end;
     overflow: hidden;
     isolation: isolate;
-    background: #08090b url('/storyline.png') center / cover no-repeat;
+    background: #08090b;
 }
 
 .storyline-hero-image {
@@ -1176,8 +1254,8 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    object-position: center;
+    object-fit: cover;
+    object-position: center bottom;
     background: transparent;
     z-index: 0;
     transform: perspective(1100px) translate3d(0, -135%, -320px) rotateX(36deg) rotateZ(-2deg) scale(1.3);
@@ -1192,7 +1270,7 @@
 .storyline-hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.28) 64%, rgba(0, 0, 0, 0.66)), linear-gradient(0deg, #08090b, transparent 38%);
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.08) 64%, rgba(0, 0, 0, 0.3)), linear-gradient(0deg, rgba(8, 9, 11, 0.72), transparent 38%);
     z-index: 1;
     opacity: 0;
 }
@@ -1314,6 +1392,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .storyline-page::after {
+        animation: none;
+    }
+
     .storyline-hero-image,
     .storyline-hero-overlay,
     .storyline-hero-content,
@@ -1455,6 +1537,24 @@
     pointer-events: none;
     opacity: 0.035;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+}
+
+.storyline-page::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 50% 20%, rgba(255, 78, 34, 0.08), transparent 38%),
+        linear-gradient(115deg, transparent 20%, rgba(255, 56, 24, 0.035) 50%, transparent 80%);
+    opacity: 0.8;
+    animation: storyline-atmosphere 18s ease-in-out infinite alternate;
+}
+
+@keyframes storyline-atmosphere {
+    from { transform: translate3d(-1%, -1%, 0) scale(1); }
+    to { transform: translate3d(1%, 1%, 0) scale(1.04); }
 }
 
 /* --- Hero cinematic vignette --- */

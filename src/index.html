@@ -264,7 +264,7 @@
     </a>
 </article>
 
-                <article id="serverIpCard" class="join-card join-card-final group hidden">
+                <article id="serverIpCard" class="join-card join-card-final group">
     <div class="join-card-top">
         <span class="join-step">03</span>
         <span class="join-status">You are ready</span>
@@ -280,12 +280,17 @@
     </div>
 
     <a
-        href="fivem://connect/89.42.88.45:30120"
+        id="serverIpBtn"
+        data-href="fivem://connect/experiencechiirp.prime-filter.com:30120"
+        aria-disabled="true"
         class="join-card-foot"
     >
         <span>Server IP ready</span>
         <i class="fas fa-arrow-right"></i>
     </a>
+    <div id="serverIpNotice" class="server-role-notice" hidden>
+        Role Survivors Required
+    </div>
 </article>
             </div>
         </section>
@@ -488,6 +493,10 @@
                 </p>
                 <div class="flex items-center gap-4 text-[10px] text-gray-600">
                     <span>Server Status: <span id="footerServerStatus" class="text-emerald-400">Checking...</span></span>
+                    <span class="developer-credit" aria-label="Developed by Vlad and Kai">
+                        <span class="developer-credit-label"><i class="fas fa-code" aria-hidden="true"></i> Developed by</span>
+                        <span class="developer-credit-names"><span>Vlad</span><span class="developer-credit-separator">/</span><span>Kai</span></span>
+                    </span>
                 </div>
             </div>
 
