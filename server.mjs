@@ -643,6 +643,37 @@ response.end();
         return;
     }
 
+    // ============================================
+    // STAFF DIRECTORY
+    // ============================================
+
+    if (
+        requestUrl.pathname === '/api/staff' &&
+        request.method === 'GET'
+    ) {
+        try {
+            const members = await getStaffMembers();
+
+            if (!members) {
+                sendJson(response, 503, {
+                    error: 'Staff roles are not configured.'
+                });
+
+                return;
+            }
+
+            sendJson(response, 200, { members });
+        } catch (error) {
+            console.error('Staff fetch error:', error);
+
+            sendJson(response, 502, {
+                error: 'Could not read Discord staff.'
+            });
+        }
+
+        return;
+    }
+
     send(response, 404, 'Not found');
 });
 
