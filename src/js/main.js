@@ -459,37 +459,45 @@ const staffDirectory = document.querySelector('[data-staff-directory]');
 const renderStaffDirectory = (members) => {
     if (!staffDirectory || !Array.isArray(members) || !members.length) return;
 
-    const groups = new Map();
+    const groupOrder = ['leadership', 'management', 'community'];
+    const groupLabels = {
+        leadership: ['Executive command', 'Leadership'],
+        management: ['Daily operations', 'Management'],
+        community: ['Community & creative operations', 'Community']
+    };
+    const groups = new Map(groupOrder.map((category) => [category, []]));
     members.forEach((member) => {
-        if (!groups.has(member.role)) groups.set(member.role, []);
-        groups.get(member.role).push(member);
+        const category = groupOrder.includes(member.category) ? member.category : 'community';
+        groups.get(category).push(member);
     });
 
-    staffDirectory.replaceChildren(...Array.from(groups, ([role, roleMembers], index) => {
+    staffDirectory.replaceChildren(...Array.from(groups, ([category, categoryMembers], index) => {
+        if (!categoryMembers.length) return null;
+        const [kicker, title] = groupLabels[category];
         const group = document.createElement('section');
-        group.className = 'staff-group';
+        group.className = `staff-group staff-group-${category}`;
         group.innerHTML = `
             <div class="staff-group-heading">
                 <span class="staff-group-index">${String(index + 1).padStart(2, '0')}</span>
-                <div><span class="staff-group-kicker">Discord role</span><h3>${role}</h3></div>
-                <span class="staff-group-count">${roleMembers.length} member${roleMembers.length === 1 ? '' : 's'}</span>
+                <div><span class="staff-group-kicker">${kicker}</span><h3>${title}</h3></div>
+                <span class="staff-group-count">${categoryMembers.length} member${categoryMembers.length === 1 ? '' : 's'}</span>
             </div>
             <div class="staff-directory"></div>
         `;
 
         const directory = group.querySelector('.staff-directory');
-        roleMembers.forEach((member) => {
+        categoryMembers.forEach((member) => {
             const card = document.createElement('article');
             card.className = 'staff-member';
             card.innerHTML = '<img class="staff-member-avatar" alt=""><div><h4></h4><span></span></div>';
             card.querySelector('img').src = member.avatar;
             card.querySelector('img').alt = member.name;
             card.querySelector('h4').textContent = member.name;
-            card.querySelector('span').textContent = role;
+            card.querySelector('span').textContent = member.role;
             directory.append(card);
         });
         return group;
-    }));
+    }).filter(Boolean));
 
     const count = document.querySelector('.staff-live');
     if (count) count.innerHTML = `<span></span> ${members.length} staff member${members.length === 1 ? '' : 's'}`;

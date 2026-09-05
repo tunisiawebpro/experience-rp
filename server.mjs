@@ -20,6 +20,11 @@ const staffRoleIds = (process.env.DISCORD_STAFF_ROLE_IDS || '')
     .split(',')
     .map((roleId) => roleId.trim())
     .filter(Boolean);
+const staffRoleGroups = {
+    leadership: (process.env.DISCORD_LEADERSHIP_ROLE_IDS || '').split(',').map((id) => id.trim()).filter(Boolean),
+    management: (process.env.DISCORD_MANAGEMENT_ROLE_IDS || '').split(',').map((id) => id.trim()).filter(Boolean),
+    community: (process.env.DISCORD_COMMUNITY_ROLE_IDS || '').split(',').map((id) => id.trim()).filter(Boolean)
+};
 
 const redirectUri = `${backendUrl}/auth/discord/callback`;
 const pool = new Pool({
@@ -161,6 +166,16 @@ const getStaffMembers = async () => {
         .filter((role) => staffRoleIds.includes(role.id))
         .sort((left, right) => right.position - left.position);
     const staffRoleMap = new Map(staffRoles.map((role) => [role.id, role]));
+    const getCategory = (role) => {
+        if (staffRoleGroups.leadership.includes(role.id)) return 'leadership';
+        if (staffRoleGroups.management.includes(role.id)) return 'management';
+        if (staffRoleGroups.community.includes(role.id)) return 'community';
+
+        const roleName = role.name.toLowerCase();
+        if (/founder|co-founder|owner/.test(roleName)) return 'leadership';
+        if (/manager|supervisor|developer|administrator|admin/.test(roleName)) return 'management';
+        return 'community';
+    };
 
     const members = [];
     let after = '0';
@@ -188,6 +203,7 @@ const getStaffMembers = async () => {
                 id: user.id,
                 name: member.nick || user.global_name || user.username,
                 role: role.name,
+                category: getCategory(role),
                 avatar
             };
         })
