@@ -455,6 +455,19 @@ const discordApiUrl =
     'https://exp-rp-backend.onrender.com';
 
 const staffDirectory = document.querySelector('[data-staff-directory]');
+const staffRoleOrder = [
+    'founder',
+    'co-founder',
+    'supervisor',
+    'staff manager',
+    'developer',
+    'discord manager',
+    'storyline director',
+    'trial moderator',
+    'interview manager',
+    'helper',
+    'pc checker'
+];
 
 const renderStaffDirectory = (members) => {
     if (!staffDirectory || !Array.isArray(members) || !members.length) return;
@@ -472,9 +485,16 @@ const renderStaffDirectory = (members) => {
     });
 
     groups.forEach((categoryMembers) => {
-        categoryMembers.sort((left, right) =>
-            left.role.localeCompare(right.role) || left.name.localeCompare(right.name)
-        );
+        categoryMembers.sort((left, right) => {
+            const leftRole = left.role.toLowerCase();
+            const rightRole = right.role.toLowerCase();
+            const leftIndex = staffRoleOrder.indexOf(leftRole);
+            const rightIndex = staffRoleOrder.indexOf(rightRole);
+            const roleDifference = (leftIndex === -1 ? staffRoleOrder.length : leftIndex)
+                - (rightIndex === -1 ? staffRoleOrder.length : rightIndex);
+
+            return roleDifference || left.role.localeCompare(right.role) || left.name.localeCompare(right.name);
+        });
     });
 
     staffDirectory.replaceChildren(...Array.from(groups, ([category, categoryMembers], index) => {
