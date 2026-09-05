@@ -454,6 +454,61 @@ const discordAuthUrl =
 const discordApiUrl =
     'https://exp-rp-backend.onrender.com';
 
+const staffDirectory = document.querySelector('[data-staff-directory]');
+
+const renderStaffDirectory = (members) => {
+    if (!staffDirectory || !Array.isArray(members) || !members.length) return;
+
+    const groups = new Map();
+    members.forEach((member) => {
+        if (!groups.has(member.role)) groups.set(member.role, []);
+        groups.get(member.role).push(member);
+    });
+
+    staffDirectory.replaceChildren(...Array.from(groups, ([role, roleMembers], index) => {
+        const group = document.createElement('section');
+        group.className = 'staff-group';
+        group.innerHTML = `
+            <div class="staff-group-heading">
+                <span class="staff-group-index">${String(index + 1).padStart(2, '0')}</span>
+                <div><span class="staff-group-kicker">Discord role</span><h3>${role}</h3></div>
+                <span class="staff-group-count">${roleMembers.length} member${roleMembers.length === 1 ? '' : 's'}</span>
+            </div>
+            <div class="staff-directory"></div>
+        `;
+
+        const directory = group.querySelector('.staff-directory');
+        roleMembers.forEach((member) => {
+            const card = document.createElement('article');
+            card.className = 'staff-member';
+            card.innerHTML = '<img class="staff-member-avatar" alt=""><div><h4></h4><span></span></div>';
+            card.querySelector('img').src = member.avatar;
+            card.querySelector('img').alt = member.name;
+            card.querySelector('h4').textContent = member.name;
+            card.querySelector('span').textContent = role;
+            directory.append(card);
+        });
+        return group;
+    }));
+
+    const count = document.querySelector('.staff-live');
+    if (count) count.innerHTML = `<span></span> ${members.length} staff member${members.length === 1 ? '' : 's'}`;
+};
+
+const refreshStaffDirectory = async () => {
+    try {
+        const response = await fetch(`${discordApiUrl}/api/staff`, { cache: 'no-store' });
+        if (!response.ok) return;
+        const data = await response.json();
+        renderStaffDirectory(data.members);
+    } catch (error) {
+        console.warn('Staff directory refresh failed:', error);
+    }
+};
+
+refreshStaffDirectory();
+setInterval(refreshStaffDirectory, 60_000);
+
     const discordProfileStorageKey =
     'experience-rp-discord-profile';
 

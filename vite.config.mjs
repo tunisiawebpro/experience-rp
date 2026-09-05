@@ -5,7 +5,7 @@ export default defineConfig({
   publicDir: '../publics',
   server: {
     port: 3000,
-    strictPort: true,
+    strictPort: false,
     open: true
   },
   build: {

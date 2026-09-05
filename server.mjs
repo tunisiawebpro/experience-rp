@@ -16,6 +16,10 @@ const botToken = process.env.DISCORD_BOT_TOKEN;
 const guildId = process.env.DISCORD_GUILD_ID;
 const survivorsRoleId = process.env.DISCORD_SURVIVORS_ROLE_ID;
 const survivorsRoleName = (process.env.DISCORD_SURVIVORS_ROLE_NAME || 'Survivors').trim().toLowerCase();
+const staffRoleIds = (process.env.DISCORD_STAFF_ROLE_IDS || '')
+    .split(',')
+    .map((roleId) => roleId.trim())
+    .filter(Boolean);
 
 const redirectUri = `${backendUrl}/auth/discord/callback`;
 const pool = new Pool({
@@ -24,6 +28,8 @@ const pool = new Pool({
         rejectUnauthorized: false
     }
 });
+
+let staffCache = { expiresAt: 0, members: null };
 
 const parseCookies = (cookieHeader = '') =>
     Object.fromEntries(
@@ -132,6 +138,63 @@ const userHasSurvivorsRole = async (userId) => {
         console.warn('Could not read guild member roles:', error);
         return false;
     }
+};
+
+const discordRequest = async (path) => {
+    const response = await fetch(`https://discord.com/api${path}`, {
+        headers: { Authorization: `Bot ${botToken}` }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Discord API returned ${response.status} for ${path}`);
+    }
+
+    return response.json();
+};
+
+const getStaffMembers = async () => {
+    if (!guildId || !botToken || !staffRoleIds.length) return null;
+    if (staffCache.members && staffCache.expiresAt > Date.now()) return staffCache.members;
+
+    const roles = await discordRequest(`/guilds/${guildId}/roles`);
+    const staffRoles = roles
+        .filter((role) => staffRoleIds.includes(role.id))
+        .sort((left, right) => right.position - left.position);
+    const staffRoleMap = new Map(staffRoles.map((role) => [role.id, role]));
+
+    const members = [];
+    let after = '0';
+    do {
+        const page = await discordRequest(`/guilds/${guildId}/members?limit=1000&after=${after}`);
+        members.push(...page);
+        if (page.length < 1000) break;
+        after = page[page.length - 1].user.id;
+    } while (members.length < 10000);
+
+    const result = members
+        .map((member) => {
+            const role = staffRoles.find((staffRole) => member.roles.includes(staffRole.id));
+            if (!role || !member.user) return null;
+
+            const user = member.user;
+            const avatarHash = member.avatar || user.avatar;
+            const avatar = avatarHash
+                ? member.avatar
+                    ? `https://cdn.discordapp.com/guilds/${guildId}/users/${user.id}/avatars/${avatarHash}.png?size=128`
+                    : `https://cdn.discordapp.com/avatars/${user.id}/${avatarHash}.png?size=128`
+                : `https://cdn.discordapp.com/embed/avatars/${Number(user.discriminator || 0) % 5}.png`;
+
+            return {
+                id: user.id,
+                name: member.nick || user.global_name || user.username,
+                role: role.name,
+                avatar
+            };
+        })
+        .filter(Boolean);
+
+    staffCache = { members: result, expiresAt: Date.now() + 60_000 };
+    return result;
 };
 
 const createSession = async (user, hasSurvivorsRole = false) => {
