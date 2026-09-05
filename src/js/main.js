@@ -469,6 +469,20 @@ const staffRoleOrder = [
     'pc checker'
 ];
 
+const normalizeStaffRole = (role) => {
+    const normalized = role
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+
+    return {
+        'co founder': 'co-founder',
+        dev: 'developer',
+        'storyline directors': 'storyline director'
+    }[normalized] || normalized;
+};
+
 const renderStaffDirectory = (members) => {
     if (!staffDirectory || !Array.isArray(members) || !members.length) return;
 
@@ -486,8 +500,8 @@ const renderStaffDirectory = (members) => {
 
     groups.forEach((categoryMembers) => {
         categoryMembers.sort((left, right) => {
-            const leftRole = left.role.toLowerCase();
-            const rightRole = right.role.toLowerCase();
+            const leftRole = normalizeStaffRole(left.role);
+            const rightRole = normalizeStaffRole(right.role);
             const leftIndex = staffRoleOrder.indexOf(leftRole);
             const rightIndex = staffRoleOrder.indexOf(rightRole);
             const roleDifference = (leftIndex === -1 ? staffRoleOrder.length : leftIndex)
