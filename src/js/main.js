@@ -471,6 +471,12 @@ const renderStaffDirectory = (members) => {
         groups.get(category).push(member);
     });
 
+    groups.forEach((categoryMembers) => {
+        categoryMembers.sort((left, right) =>
+            left.role.localeCompare(right.role) || left.name.localeCompare(right.name)
+        );
+    });
+
     staffDirectory.replaceChildren(...Array.from(groups, ([category, categoryMembers], index) => {
         if (!categoryMembers.length) return null;
         const [kicker, title] = groupLabels[category];

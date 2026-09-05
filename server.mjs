@@ -173,7 +173,7 @@ const getStaffMembers = async () => {
 
         const roleName = role.name.toLowerCase();
         if (/founder|co-founder|owner/.test(roleName)) return 'leadership';
-        if (/manager|supervisor|developer|administrator|admin/.test(roleName)) return 'management';
+        if (/storyline director|supervisor|staff manager|developer|administrator|admin/.test(roleName)) return 'management';
         return 'community';
     };
 
