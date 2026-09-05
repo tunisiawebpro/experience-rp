@@ -171,9 +171,9 @@ const getStaffMembers = async () => {
         if (staffRoleGroups.management.includes(role.id)) return 'management';
         if (staffRoleGroups.community.includes(role.id)) return 'community';
 
-        const roleName = role.name.toLowerCase();
-        if (/founder|co-founder|owner/.test(roleName)) return 'leadership';
-        if (/storyline director|supervisor|staff manager|developer|administrator|admin/.test(roleName)) return 'management';
+        const roleName = role.name.trim().toLowerCase().replace(/\s+/g, ' ');
+        if (/^(co-?founder|founder)$/.test(roleName)) return 'leadership';
+        if (/^(supervisor|staff manager|developer|discord manager|storyline director)$/.test(roleName)) return 'management';
         return 'community';
     };
 
