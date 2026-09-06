@@ -557,6 +557,102 @@ const refreshStaffDirectory = async () => {
 refreshStaffDirectory();
 setInterval(refreshStaffDirectory, 60_000);
 
+const creatorDirectory = document.querySelector('[data-creator-directory]');
+const creatorCount = document.querySelector('[data-creator-count]');
+const creatorLiveLabel = document.querySelector('[data-creator-live-label]');
+
+const createCreatorCard = (creator, index) => {
+    const card = document.createElement('article');
+    card.className = `creator-card is-visible creator-card-${index + 1}`;
+
+    const art = document.createElement('div');
+    art.className = `creator-card-art creator-art-${['stream', 'video', 'community', 'stau'][index % 4]}`;
+
+    if (creator.avatar) {
+        const avatar = document.createElement('img');
+        avatar.className = 'creator-card-avatar';
+        avatar.src = creator.avatar;
+        avatar.alt = creator.name;
+        art.append(avatar);
+    } else {
+        const initials = document.createElement('span');
+        initials.className = 'creator-initials';
+        initials.textContent = creator.name.slice(0, 1).toUpperCase();
+        art.append(initials);
+    }
+
+    const status = document.createElement('span');
+    status.className = `creator-card-status ${creator.isLive ? 'is-live' : 'is-offline'}`;
+    status.textContent = creator.isLive ? 'LIVE' : 'OFFLINE';
+    art.append(status);
+
+    const artLabel = document.createElement('span');
+    artLabel.textContent = creator.isLive ? 'LIVE NOW' : creator.platform.toUpperCase();
+    art.append(artLabel);
+
+    const body = document.createElement('div');
+    body.className = 'creator-card-body';
+
+    const header = document.createElement('div');
+    const kicker = document.createElement('span');
+    kicker.className = 'creator-card-kicker';
+    kicker.textContent = `${String(index + 1).padStart(2, '0')} / ${creator.platform.toUpperCase()} CREATOR`;
+    const name = document.createElement('h3');
+    name.textContent = creator.name;
+    header.append(kicker, name);
+
+    const platform = document.createElement(creator.platform.toLowerCase() === 'tiktok' ? 'i' : 'strong');
+    platform.className = creator.platform.toLowerCase() === 'tiktok' ? 'fab fa-tiktok creator-platform-icon' : 'creator-platform-word';
+    if (creator.platform.toLowerCase() !== 'tiktok') platform.textContent = 'KICK';
+
+    const description = document.createElement('p');
+    description.textContent = creator.isLive
+        ? `${creator.name} is live now, bringing Experience RP to the audience.`
+        : `${creator.name} creates and shares moments from inside Experience RP.`;
+
+    const link = document.createElement('a');
+    link.href = creator.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = creator.isLive ? `Watch ${creator.name} live ` : `Visit ${creator.name} `;
+    const arrow = document.createElement('i');
+    arrow.className = 'fas fa-arrow-right';
+    link.append(arrow);
+
+    body.append(header, platform, description, link);
+    card.append(art, body);
+    return card;
+};
+
+const renderCreatorDirectory = (creators) => {
+    if (!creatorDirectory || !Array.isArray(creators)) return;
+
+    creatorDirectory.replaceChildren(...creators.map(createCreatorCard));
+    if (creatorCount) creatorCount.textContent = creators.length;
+    if (creatorLiveLabel) {
+        const liveCount = creators.filter((creator) => creator.isLive).length;
+        creatorLiveLabel.textContent = liveCount
+            ? `${liveCount} creator${liveCount === 1 ? '' : 's'} live now`
+            : 'Creator network online';
+    }
+};
+
+const refreshCreatorDirectory = async () => {
+    if (!creatorDirectory) return;
+
+    try {
+        const response = await fetch(`${discordApiUrl}/api/creators`, { cache: 'no-store' });
+        if (!response.ok) return;
+        const data = await response.json();
+        renderCreatorDirectory(data.members);
+    } catch (error) {
+        console.warn('Creator directory refresh failed:', error);
+    }
+};
+
+refreshCreatorDirectory();
+setInterval(refreshCreatorDirectory, 30_000);
+
     const discordProfileStorageKey =
     'experience-rp-discord-profile';
 

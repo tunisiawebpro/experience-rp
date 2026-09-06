@@ -25,6 +25,23 @@ const staffRoleGroups = {
     management: (process.env.DISCORD_MANAGEMENT_ROLE_IDS || '').split(',').map((id) => id.trim()).filter(Boolean),
     community: (process.env.DISCORD_COMMUNITY_ROLE_IDS || '').split(',').map((id) => id.trim()).filter(Boolean)
 };
+const contentCreatorRoleIds = (process.env.DISCORD_CONTENT_CREATOR_ROLE_IDS || process.env.DISCORD_CONTENT_CREATORS_ROLE_ID || '')
+    .split(',')
+    .map((roleId) => roleId.trim())
+    .filter(Boolean);
+const contentCreatorRoleName = (process.env.DISCORD_CONTENT_CREATOR_ROLE_NAME || 'Content Creator').trim().toLowerCase();
+const defaultCreatorProfiles = {
+    axel: { platform: 'Kick', url: 'https://kick.com/axelsharky', slug: 'axelsharky' },
+    ray: { platform: 'TikTok', url: 'https://www.tiktok.com/@ray__1st', slug: 'ray__1st' },
+    element: { platform: 'Kick', url: 'https://kick.com/element_tn', slug: 'element_tn' },
+    'st@u': { platform: 'TikTok', url: 'https://www.tiktok.com/@da7loub_', slug: 'da7loub_' }
+};
+let creatorProfiles = defaultCreatorProfiles;
+try {
+    creatorProfiles = { ...defaultCreatorProfiles, ...JSON.parse(process.env.CONTENT_CREATOR_PROFILES || '{}') };
+} catch {
+    console.warn('CONTENT_CREATOR_PROFILES must be valid JSON; using built-in creator links.');
+}
 
 const redirectUri = `${backendUrl}/auth/discord/callback`;
 const pool = new Pool({
@@ -35,6 +52,7 @@ const pool = new Pool({
 });
 
 let staffCache = { expiresAt: 0, members: null };
+let creatorCache = { expiresAt: 0, members: null };
 
 const parseCookies = (cookieHeader = '') =>
     Object.fromEntries(
@@ -214,6 +232,82 @@ const getStaffMembers = async () => {
         .filter(Boolean);
 
     staffCache = { members: result, expiresAt: Date.now() + 60_000 };
+    return result;
+};
+
+const normalizeCreatorKey = (value = '') => value.toLowerCase().replace(/[^a-z0-9@]+/g, '').trim();
+
+const getCreatorProfile = (member, role) => {
+    const keys = [member.user?.id, member.nick, member.user?.global_name, member.user?.username, role.name]
+        .filter(Boolean)
+        .map(normalizeCreatorKey);
+    const match = Object.entries(creatorProfiles).find(([key]) => keys.includes(normalizeCreatorKey(key)));
+    return match?.[1] || null;
+};
+
+const getCreatorLiveStatus = async (profile) => {
+    if (!profile?.platform || !profile.slug) return false;
+
+    try {
+        if (profile.platform.toLowerCase() === 'kick') {
+            const response = await fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(profile.slug)}`);
+            if (!response.ok) return false;
+            const data = await response.json();
+            return Boolean(data.livestream?.is_live || data.livestream);
+        }
+
+        if (profile.platform.toLowerCase() === 'tiktok') {
+            const response = await fetch(`https://www.tiktok.com/@${encodeURIComponent(profile.slug)}`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+            if (!response.ok) return false;
+            const page = await response.text();
+            return /"isLive"\s*:\s*true|"is_live"\s*:\s*true/i.test(page);
+        }
+    } catch (error) {
+        console.warn(`Could not read ${profile.platform} status for ${profile.slug}:`, error.message);
+    }
+
+    return false;
+};
+
+const getContentCreators = async () => {
+    if (!guildId || !botToken) return null;
+    if (creatorCache.members && creatorCache.expiresAt > Date.now()) return creatorCache.members;
+
+    const roles = await discordRequest(`/guilds/${guildId}/roles`);
+    const creatorRoles = roles.filter((role) =>
+        contentCreatorRoleIds.includes(role.id) ||
+        (role.name || '').trim().toLowerCase() === contentCreatorRoleName
+    );
+    if (!creatorRoles.length) return [];
+
+    const members = [];
+    let after = '0';
+    do {
+        const page = await discordRequest(`/guilds/${guildId}/members?limit=1000&after=${after}`);
+        members.push(...page);
+        if (page.length < 1000) break;
+        after = page[page.length - 1].user.id;
+    } while (members.length < 10000);
+
+    const creators = members.map((member) => {
+        const role = creatorRoles.find((creatorRole) => member.roles.includes(creatorRole.id));
+        if (!role || !member.user) return null;
+
+        const user = member.user;
+        const profile = getCreatorProfile(member, role);
+        if (!profile?.url) return null;
+        const avatarHash = member.avatar || user.avatar;
+        const avatar = avatarHash
+            ? member.avatar
+                ? `https://cdn.discordapp.com/guilds/${guildId}/users/${user.id}/avatars/${avatarHash}.png?size=256`
+                : `https://cdn.discordapp.com/avatars/${user.id}/${avatarHash}.png?size=256`
+            : `https://cdn.discordapp.com/embed/avatars/${Number(user.discriminator || 0) % 5}.png`;
+
+        return { id: user.id, name: member.nick || user.global_name || user.username, avatar, platform: profile.platform, url: profile.url, slug: profile.slug };
+    }).filter(Boolean);
+
+    const result = await Promise.all(creators.map(async (creator) => ({ ...creator, isLive: await getCreatorLiveStatus(creator) })));
+    creatorCache = { members: result, expiresAt: Date.now() + 30_000 };
     return result;
 };
 
@@ -689,6 +783,31 @@ response.end();
             sendJson(response, 502, {
                 error: 'Could not read Discord staff.'
             });
+        }
+
+        return;
+    }
+
+    // ============================================
+    // CONTENT CREATOR DIRECTORY
+    // ============================================
+
+    if (
+        requestUrl.pathname === '/api/creators' &&
+        request.method === 'GET'
+    ) {
+        try {
+            const members = await getContentCreators();
+
+            if (!members) {
+                sendJson(response, 503, { error: 'Content creator roles are not configured.' });
+                return;
+            }
+
+            sendJson(response, 200, { members });
+        } catch (error) {
+            console.error('Content creator fetch error:', error);
+            sendJson(response, 502, { error: 'Could not read Discord content creators.' });
         }
 
         return;
