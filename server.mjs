@@ -31,6 +31,10 @@ const contentCreatorRoleIds = (process.env.DISCORD_CONTENT_CREATOR_ROLE_ID || pr
     .filter(Boolean);
 const contentCreatorRoleName = (process.env.DISCORD_CONTENT_CREATOR_ROLE_NAME || 'Content Creator').trim().toLowerCase();
 const defaultCreatorProfiles = {
+    '190563870635589632': { platform: 'Kick', url: 'https://kick.com/axelsharky', slug: 'axelsharky' },
+    '252434851209150464': { platform: 'Kick', url: 'https://kick.com/element_tn', slug: 'element_tn' },
+    '358497061026398208': { platform: 'TikTok', url: 'https://www.tiktok.com/@ray__1st', slug: 'ray__1st' },
+    '1187372118736900160': { platform: 'TikTok', url: 'https://www.tiktok.com/@da7loub_', slug: 'da7loub_' },
     axel: { platform: 'Kick', url: 'https://kick.com/axelsharky', slug: 'axelsharky' },
     ray: { platform: 'TikTok', url: 'https://www.tiktok.com/@ray__1st', slug: 'ray__1st' },
     element: { platform: 'Kick', url: 'https://kick.com/element_tn', slug: 'element_tn' },
@@ -238,12 +242,17 @@ const getStaffMembers = async () => {
 const normalizeCreatorKey = (value = '') => value.toLowerCase().replace(/[^a-z0-9@]+/g, '').trim();
 
 const getCreatorProfile = (member, role) => {
-    const keys = [member.user?.id, member.nick, member.user?.global_name, member.user?.username, role.name]
+    const userId = normalizeCreatorKey(member.user?.id);
+    const idProfile = creatorProfiles[userId];
+    if (idProfile) return idProfile;
+
+    const keys = [member.nick, member.user?.global_name, member.user?.username]
         .filter(Boolean)
         .map(normalizeCreatorKey);
     const match = Object.entries(creatorProfiles).find(([key]) => {
         const normalizedKey = normalizeCreatorKey(key);
-        return keys.some((memberKey) => memberKey === normalizedKey || memberKey.includes(normalizedKey) || normalizedKey.includes(memberKey));
+        if (/^\d+$/.test(normalizedKey)) return false;
+        return keys.includes(normalizedKey);
     });
     return match?.[1] || null;
 };
