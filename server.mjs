@@ -10,6 +10,7 @@ const port = process.env.PORT || 3002;
 
 const websiteUrl = process.env.FRONTEND_URL || 'https://exp-rp.netlify.app';
 const backendUrl = process.env.BACKEND_URL || 'http://localhost:3002';
+const fivemServerAddress = process.env.FIVEM_SERVER_ADDRESS || 'experiencechiirp.prime-filter.com:30120';
 const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || '';
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || '';
 const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@experience-rp.com';
@@ -90,6 +91,25 @@ const sendJson = (response, status, data) => {
     });
 
     response.end(JSON.stringify(data));
+};
+
+const getFiveMServerStatus = async () => {
+    try {
+        const response = await fetch(`http://${fivemServerAddress}/info.json`, {
+            cache: 'no-store',
+            signal: AbortSignal.timeout(8_000)
+        });
+        if (!response.ok) return { online: false, players: null, maxPlayers: null };
+        const data = await response.json();
+        return {
+            online: true,
+            players: Number.isFinite(data?.clients) ? data.clients : null,
+            maxPlayers: Number.isFinite(data?.sv_maxclients) ? data.sv_maxclients : null
+        };
+    } catch (error) {
+        console.warn('FiveM status proxy failed:', error.message);
+        return { online: false, players: null, maxPlayers: null };
+    }
 };
 
 const send = (response, status, body) => {
@@ -965,6 +985,11 @@ response.end();
             console.error('Push test error:', error);
             sendJson(response, 400, { error: error.message || 'Could not send test notification.' });
         }
+        return;
+    }
+
+    if (requestUrl.pathname === '/api/server-status' && request.method === 'GET') {
+        sendJson(response, 200, await getFiveMServerStatus());
         return;
     }
 

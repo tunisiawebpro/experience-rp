@@ -1,6 +1,7 @@
 const discordServerId = '1531222351918927983';
 const discordInviteCode = 'PSyquaZek';
 const fivemServerAddress = 'experiencechiirp.prime-filter.com:30120';
+const discordApiUrl = 'https://exp-rp-backend.onrender.com';
 
 function updateServerStatus(isOnline) {
     const statusText = document.getElementById('serverStatusText');
@@ -48,14 +49,14 @@ function updateServerStatus(isOnline) {
 
 async function fetchFiveMServerStatus() {
     try {
-        const response = await fetch(`http://${fivemServerAddress}/info.json`, {
+        const response = await fetch(`${discordApiUrl}/api/server-status`, {
             cache: 'no-store',
             signal: AbortSignal.timeout(8000)
         });
-        if (!response.ok) throw new Error(`FiveM status returned ${response.status}`);
+        if (!response.ok) throw new Error(`Status proxy returned ${response.status}`);
 
-        await response.json();
-        updateServerStatus(true);
+        const data = await response.json();
+        updateServerStatus(data.online === true);
     } catch (error) {
         updateServerStatus(false);
         console.log('FiveM server is offline or unavailable');
