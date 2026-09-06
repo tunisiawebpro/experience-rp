@@ -506,6 +506,7 @@ const registerPushNotifications = async (requestPermission = false) => {
         }
 
         pushRegistration ??= await navigator.serviceWorker.register('/push-sw.js');
+        pushRegistration = await navigator.serviceWorker.ready;
         let subscription = await pushRegistration.pushManager.getSubscription();
         subscription ??= await pushRegistration.pushManager.subscribe({
             userVisibleOnly: true,
@@ -518,14 +519,17 @@ const registerPushNotifications = async (requestPermission = false) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(subscription)
         });
-        if (!response.ok) throw new Error('Subscription could not be saved.');
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Subscription could not be saved (${response.status}).`);
+        }
 
         pushNotificationsBtn?.querySelector('span')?.replaceChildren('Live alerts enabled');
         setPushStatus('You will be notified when a creator goes live.');
         return true;
     } catch (error) {
         console.warn('Push notification setup failed:', error);
-        setPushStatus('Could not enable live alerts yet.', true);
+        setPushStatus(error.message || 'Could not enable live alerts yet.', true);
         return false;
     }
 };
