@@ -19,7 +19,7 @@ function updateServerStatus(isOnline) {
             : 'text-red-400 text-xs uppercase tracking-wider';
     }
 
-    if (statusLabel) statusLabel.textContent = online ? 'Operational' : 'Offline';
+    if (statusLabel) statusLabel.textContent = online ? 'Online' : 'Offline';
     if (footerStatus) {
         footerStatus.textContent = online ? 'Online' : 'Offline';
         footerStatus.className = online ? 'text-emerald-400' : 'text-red-400';
