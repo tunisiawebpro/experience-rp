@@ -601,9 +601,12 @@ const createCreatorCard = (creator, index) => {
     name.textContent = creator.name;
     header.append(kicker, name);
 
-    const platform = document.createElement(creator.platform.toLowerCase() === 'tiktok' ? 'i' : 'strong');
-    platform.className = creator.platform.toLowerCase() === 'tiktok' ? 'fab fa-tiktok creator-platform-icon' : 'creator-platform-word';
-    if (creator.platform.toLowerCase() !== 'tiktok') platform.textContent = 'KICK';
+    const platform = document.createElement('i');
+    platform.className = creator.platform.toLowerCase() === 'tiktok'
+        ? 'fab fa-tiktok creator-platform-icon'
+        : 'fas fa-satellite-dish creator-platform-icon';
+    platform.setAttribute('title', creator.platform);
+    platform.setAttribute('aria-label', creator.platform);
 
     const description = document.createElement('p');
     description.textContent = creator.isLive
