@@ -25,7 +25,7 @@ const staffRoleGroups = {
     management: (process.env.DISCORD_MANAGEMENT_ROLE_IDS || '').split(',').map((id) => id.trim()).filter(Boolean),
     community: (process.env.DISCORD_COMMUNITY_ROLE_IDS || '').split(',').map((id) => id.trim()).filter(Boolean)
 };
-const contentCreatorRoleIds = (process.env.DISCORD_CONTENT_CREATOR_ROLE_IDS || process.env.DISCORD_CONTENT_CREATORS_ROLE_ID || '')
+const contentCreatorRoleIds = (process.env.DISCORD_CONTENT_CREATOR_ROLE_ID || process.env.DISCORD_CONTENT_CREATOR_ROLE_IDS || process.env.DISCORD_CONTENT_CREATORS_ROLE_ID || '')
     .split(',')
     .map((roleId) => roleId.trim())
     .filter(Boolean);
@@ -241,7 +241,10 @@ const getCreatorProfile = (member, role) => {
     const keys = [member.user?.id, member.nick, member.user?.global_name, member.user?.username, role.name]
         .filter(Boolean)
         .map(normalizeCreatorKey);
-    const match = Object.entries(creatorProfiles).find(([key]) => keys.includes(normalizeCreatorKey(key)));
+    const match = Object.entries(creatorProfiles).find(([key]) => {
+        const normalizedKey = normalizeCreatorKey(key);
+        return keys.some((memberKey) => memberKey === normalizedKey || memberKey.includes(normalizedKey) || normalizedKey.includes(memberKey));
+    });
     return match?.[1] || null;
 };
 
