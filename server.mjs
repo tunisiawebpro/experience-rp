@@ -10,7 +10,7 @@ const port = process.env.PORT || 3002;
 
 const websiteUrl = process.env.FRONTEND_URL || 'https://exp-rp.netlify.app';
 const backendUrl = process.env.BACKEND_URL || 'http://localhost:3002';
-const fivemServerAddress = process.env.FIVEM_SERVER_ADDRESS || 'experiencechiirp.prime-filter.com:30120';
+const fivemServerAddress = process.env.FIVEM_SERVER_ADDRESS || '5.175.164.206:30120';
 const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || '';
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || '';
 const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@experience-rp.com';

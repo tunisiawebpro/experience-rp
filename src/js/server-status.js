@@ -1,6 +1,5 @@
 const discordServerId = '1531222351918927983';
 const discordInviteCode = 'PSyquaZek';
-const fivemServerAddress = 'experiencechiirp.prime-filter.com:30120';
 const discordApiUrl = 'https://exp-rp-backend.onrender.com';
 
 function updateServerStatus(isOnline) {
