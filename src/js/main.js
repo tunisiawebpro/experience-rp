@@ -678,6 +678,47 @@ setInterval(refreshStaffDirectory, 60_000);
 const creatorDirectory = document.querySelector('[data-creator-directory]');
 const creatorCount = document.querySelector('[data-creator-count]');
 const creatorLiveLabel = document.querySelector('[data-creator-live-label]');
+const creatorLiveToasts = document.getElementById('creatorLiveToasts');
+let creatorLiveState = new Map();
+let creatorStateInitialized = false;
+
+const showCreatorLiveToast = (creator) => {
+    if (!creatorLiveToasts) return;
+
+    const toast = document.createElement('article');
+    toast.className = 'creator-live-toast';
+
+    const avatar = document.createElement('img');
+    avatar.className = 'creator-live-toast-avatar';
+    avatar.src = creator.avatar || '/images/logoex.png';
+    avatar.alt = creator.name;
+
+    const copy = document.createElement('div');
+    copy.className = 'creator-live-toast-copy';
+    const title = document.createElement('strong');
+    title.textContent = `${creator.name} is live now`;
+    const platform = document.createElement('span');
+    platform.textContent = `Live on ${creator.platform}`;
+    copy.append(title, platform);
+
+    const link = document.createElement('a');
+    link.className = 'creator-live-toast-link';
+    link.href = creator.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = 'Watch';
+
+    const close = document.createElement('button');
+    close.className = 'creator-live-toast-close';
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Dismiss notification');
+    close.innerHTML = '<i class="fas fa-xmark" aria-hidden="true"></i>';
+    close.addEventListener('click', () => toast.remove());
+
+    toast.append(avatar, copy, link, close);
+    creatorLiveToasts.prepend(toast);
+    window.setTimeout(() => toast.remove(), 10_000);
+};
 
 const createCreatorCard = (creator, index) => {
     const card = document.createElement('article');
@@ -753,6 +794,14 @@ const createCreatorCard = (creator, index) => {
 
 const renderCreatorDirectory = (creators) => {
     if (!creatorDirectory || !Array.isArray(creators)) return;
+
+    if (creatorStateInitialized) {
+        creators.forEach((creator) => {
+            if (creator.isLive && creatorLiveState.get(creator.id) === false) showCreatorLiveToast(creator);
+        });
+    }
+    creatorLiveState = new Map(creators.map((creator) => [creator.id, creator.isLive]));
+    creatorStateInitialized = true;
 
     creatorDirectory.replaceChildren(...creators.map(createCreatorCard));
     if (creatorCount) creatorCount.textContent = creators.length;
