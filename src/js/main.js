@@ -601,10 +601,16 @@ const createCreatorCard = (creator, index) => {
     name.textContent = creator.name;
     header.append(kicker, name);
 
-    const platform = document.createElement('i');
+    const platform = creator.platform.toLowerCase() === 'tiktok'
+        ? document.createElement('i')
+        : document.createElement('img');
     platform.className = creator.platform.toLowerCase() === 'tiktok'
         ? 'fab fa-tiktok creator-platform-icon'
-        : 'fas fa-satellite-dish creator-platform-icon';
+        : 'creator-platform-logo';
+    if (creator.platform.toLowerCase() !== 'tiktok') {
+        platform.src = 'https://cdn.simpleicons.org/kick/FFD700';
+        platform.alt = 'Kick';
+    }
     platform.setAttribute('title', creator.platform);
     platform.setAttribute('aria-label', creator.platform);
 
