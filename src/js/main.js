@@ -443,6 +443,7 @@ const discordLoginBtn = document.getElementById('discordLoginBtn');
 const discordAccountMenu = document.getElementById('discordAccountMenu');
 const discordSignOut = document.getElementById('discordSignOut');
 const pushNotificationsBtn = document.getElementById('pushNotificationsBtn');
+const pushTestBtn = document.getElementById('pushTestBtn');
 const pushNotificationsStatus = document.getElementById('pushNotificationsStatus');
 const serverConnectBtn = document.getElementById('serverConnectBtn');
 const serverAccessNotice = document.getElementById('serverAccessNotice');
@@ -525,6 +526,7 @@ const registerPushNotifications = async (requestPermission = false) => {
         }
 
         pushNotificationsBtn?.querySelector('span')?.replaceChildren('Live alerts enabled');
+        pushTestBtn?.removeAttribute('hidden');
         setPushStatus('You will be notified when a creator goes live.');
         return true;
     } catch (error) {
@@ -551,6 +553,24 @@ const unsubscribePushNotifications = async () => {
 };
 
 pushNotificationsBtn?.addEventListener('click', () => registerPushNotifications(true));
+
+pushTestBtn?.addEventListener('click', async () => {
+    pushTestBtn.disabled = true;
+    setPushStatus('Sending test notification...');
+    try {
+        const response = await fetch(`${discordApiUrl}/api/push/test`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Test notification failed.');
+        setPushStatus('Test notification sent.');
+    } catch (error) {
+        setPushStatus(error.message || 'Test notification failed.', true);
+    } finally {
+        pushTestBtn.disabled = false;
+    }
+});
 
 const staffDirectory = document.querySelector('[data-staff-directory]');
 const staffRoleOrder = [

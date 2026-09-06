@@ -395,6 +395,34 @@ const sendCreatorPush = async (creator) => {
     }));
 };
 
+const sendTestPush = async (userId) => {
+    if (!pushEnabled) throw new Error('Web Push is not configured on the backend.');
+
+    const result = await pool.query(
+        'SELECT endpoint, subscription FROM push_subscriptions WHERE discord_id = $1',
+        [userId]
+    );
+    if (!result.rows.length) throw new Error('No push subscription found for this account.');
+
+    const payload = JSON.stringify({
+        title: 'Experience RP notifications are working',
+        body: 'This is a test alert from the creator network.',
+        url: websiteUrl,
+        tag: 'experience-rp-push-test'
+    });
+
+    await Promise.all(result.rows.map(async (row) => {
+        try {
+            await webpush.sendNotification(row.subscription, payload);
+        } catch (error) {
+            if (error.statusCode === 404 || error.statusCode === 410) {
+                await pool.query('DELETE FROM push_subscriptions WHERE endpoint = $1', [row.endpoint]);
+            }
+            throw error;
+        }
+    }));
+};
+
 let previousCreatorLiveState = new Map();
 let creatorMonitorStarted = false;
 
@@ -919,6 +947,23 @@ response.end();
         } catch (error) {
             console.error('Push unsubscribe error:', error);
             sendJson(response, 400, { error: 'Could not remove push subscription.' });
+        }
+        return;
+    }
+
+    if (requestUrl.pathname === '/api/push/test' && request.method === 'POST') {
+        try {
+            const session = await getAuthenticatedSession(request);
+            if (!session) {
+                sendJson(response, 401, { error: 'Discord login required.' });
+                return;
+            }
+
+            await sendTestPush(session.discord_id);
+            sendJson(response, 200, { success: true });
+        } catch (error) {
+            console.error('Push test error:', error);
+            sendJson(response, 400, { error: error.message || 'Could not send test notification.' });
         }
         return;
     }
