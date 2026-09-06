@@ -841,6 +841,10 @@
 .discord-account-menu button:hover { background: rgba(220, 38, 38, 0.14); color: #fca5a5; }
 .discord-account-menu button i { color: #f87171; }
 
+.discord-account-menu #pushNotificationsBtn:hover { background: rgba(255, 215, 0, 0.12); color: #ffd700; }
+.discord-account-menu #pushNotificationsBtn i { color: #ffd700; }
+.push-notifications-status { min-height: 0.8rem; padding: 0 0.7rem 0.35rem; color: #737780; font-size: 0.58rem; line-height: 1.4; }
+
 .discord-login:hover,
 .discord-login:focus-visible {
     border-color: #ffd700;

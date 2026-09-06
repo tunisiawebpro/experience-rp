@@ -442,6 +442,8 @@ entranceScreen?.addEventListener(
 const discordLoginBtn = document.getElementById('discordLoginBtn');
 const discordAccountMenu = document.getElementById('discordAccountMenu');
 const discordSignOut = document.getElementById('discordSignOut');
+const pushNotificationsBtn = document.getElementById('pushNotificationsBtn');
+const pushNotificationsStatus = document.getElementById('pushNotificationsStatus');
 const serverConnectBtn = document.getElementById('serverConnectBtn');
 const serverAccessNotice = document.getElementById('serverAccessNotice');
 const serverIpBtn = document.getElementById('serverIpBtn');
@@ -453,6 +455,98 @@ const discordAuthUrl =
 
 const discordApiUrl =
     'https://exp-rp-backend.onrender.com';
+
+let pushRegistration;
+
+const setPushStatus = (message, isError = false) => {
+    if (!pushNotificationsStatus) return;
+    pushNotificationsStatus.textContent = message;
+    pushNotificationsStatus.classList.toggle('is-error', isError);
+};
+
+const urlBase64ToUint8Array = (value) => {
+    const padding = '='.repeat((4 - (value.length % 4)) % 4);
+    const base64 = (value + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    return Uint8Array.from([...rawData].map((character) => character.charCodeAt(0)));
+};
+
+const getPushConfig = async () => {
+    const response = await fetch(`${discordApiUrl}/api/push/config`, { cache: 'no-store' });
+    if (!response.ok) throw new Error('Push configuration unavailable.');
+    return response.json();
+};
+
+const registerPushNotifications = async (requestPermission = false) => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+        setPushStatus('Browser notifications are not supported.', true);
+        return false;
+    }
+
+    if (Notification.permission === 'denied') {
+        setPushStatus('Notifications are blocked in browser settings.', true);
+        return false;
+    }
+
+    try {
+        const config = await getPushConfig();
+        if (!config.enabled || !config.publicKey) {
+            setPushStatus('Live alerts are being configured.', true);
+            return false;
+        }
+
+        if (!requestPermission && Notification.permission !== 'granted') return false;
+
+        if (requestPermission && Notification.permission !== 'granted') {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                setPushStatus('Notification permission was not granted.', true);
+                return false;
+            }
+        }
+
+        pushRegistration ??= await navigator.serviceWorker.register('/push-sw.js');
+        let subscription = await pushRegistration.pushManager.getSubscription();
+        subscription ??= await pushRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(config.publicKey)
+        });
+
+        const response = await fetch(`${discordApiUrl}/api/push/subscribe`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(subscription)
+        });
+        if (!response.ok) throw new Error('Subscription could not be saved.');
+
+        pushNotificationsBtn?.querySelector('span')?.replaceChildren('Live alerts enabled');
+        setPushStatus('You will be notified when a creator goes live.');
+        return true;
+    } catch (error) {
+        console.warn('Push notification setup failed:', error);
+        setPushStatus('Could not enable live alerts yet.', true);
+        return false;
+    }
+};
+
+const unsubscribePushNotifications = async () => {
+    try {
+        const subscription = await pushRegistration?.pushManager.getSubscription();
+        if (!subscription) return;
+        await fetch(`${discordApiUrl}/api/push/unsubscribe`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: subscription.endpoint })
+        });
+        await subscription.unsubscribe();
+    } catch (error) {
+        console.warn('Push notification unsubscribe failed:', error);
+    }
+};
+
+pushNotificationsBtn?.addEventListener('click', () => registerPushNotifications(true));
 
 const staffDirectory = document.querySelector('[data-staff-directory]');
 const staffRoleOrder = [
@@ -787,6 +881,7 @@ const checkDiscordSession = async () => {
 
         renderDiscordProfile(profile);
         applyServerAccessState(hasSurvivorsRole);
+        registerPushNotifications(false);
 
         // Remove ?discord=...&username=...&avatar=...&survivors=...
         // from the URL
@@ -808,6 +903,7 @@ const checkDiscordSession = async () => {
         if (savedProfile?.username) {
             renderDiscordProfile(savedProfile);
             applyServerAccessState(!!savedProfile.hasSurvivorsRole);
+            registerPushNotifications(false);
             return;
         }
     } catch {
@@ -844,6 +940,7 @@ const checkDiscordSession = async () => {
 
             renderDiscordProfile(profile);
             applyServerAccessState(!!data.user.hasSurvivorsRole);
+            registerPushNotifications(false);
         } else {
             applyServerAccessState(false);
         }
@@ -859,6 +956,7 @@ checkDiscordSession();
 
 discordSignOut?.addEventListener('click', async () => {
     discordAccountMenu?.setAttribute('hidden', '');
+    await unsubscribePushNotifications();
 
     try {
         await fetch(

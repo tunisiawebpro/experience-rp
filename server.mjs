@@ -2,6 +2,7 @@ import http from 'node:http';
 import crypto from 'node:crypto';
 import { URL } from 'node:url';
 import pg from 'pg';
+import webpush from 'web-push';
 
 const { Pool } = pg;
 
@@ -9,6 +10,14 @@ const port = process.env.PORT || 3002;
 
 const websiteUrl = process.env.FRONTEND_URL || 'https://exp-rp.netlify.app';
 const backendUrl = process.env.BACKEND_URL || 'http://localhost:3002';
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || '';
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || '';
+const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@experience-rp.com';
+const pushEnabled = Boolean(vapidPublicKey && vapidPrivateKey);
+
+if (pushEnabled) {
+    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+}
 
 const clientId = process.env.DISCORD_CLIENT_ID;
 const clientSecret = process.env.DISCORD_CLIENT_SECRET;
@@ -89,6 +98,18 @@ const send = (response, status, body) => {
     });
 
     response.end(body);
+};
+
+const readJsonBody = async (request) => {
+    const chunks = [];
+    for await (const chunk of request) chunks.push(chunk);
+    if (!chunks.length) return {};
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+};
+
+const getAuthenticatedSession = async (request) => {
+    const cookies = parseCookies(request.headers.cookie || '');
+    return getSession(cookies.session_id);
 };
 
 const resolveSurvivorsRoleId = async () => {
@@ -326,6 +347,84 @@ const getContentCreators = async () => {
     const result = await Promise.all(creators.map(async (creator) => ({ ...creator, isLive: await getCreatorLiveStatus(creator) })));
     creatorCache = { members: result, expiresAt: Date.now() + 30_000 };
     return result;
+};
+
+const savePushSubscription = async (userId, subscription) => {
+    await pool.query(
+        `
+        INSERT INTO push_subscriptions (discord_id, endpoint, subscription, updated_at)
+        VALUES ($1, $2, $3::jsonb, NOW())
+        ON CONFLICT (endpoint)
+        DO UPDATE SET discord_id = EXCLUDED.discord_id, subscription = EXCLUDED.subscription, updated_at = NOW()
+        `,
+        [userId, subscription.endpoint, JSON.stringify(subscription)]
+    );
+};
+
+const removePushSubscription = async (userId, endpoint) => {
+    await pool.query(
+        'DELETE FROM push_subscriptions WHERE discord_id = $1 AND endpoint = $2',
+        [userId, endpoint]
+    );
+};
+
+const sendCreatorPush = async (creator) => {
+    if (!pushEnabled) return;
+
+    const result = await pool.query(
+        'SELECT discord_id, endpoint, subscription FROM push_subscriptions'
+    );
+    const payload = JSON.stringify({
+        title: `${creator.name} is live now`,
+        body: `${creator.name} is streaming on ${creator.platform}.`,
+        url: creator.url,
+        creatorId: creator.id,
+        tag: `creator-live-${creator.id}`
+    });
+
+    await Promise.all(result.rows.map(async (row) => {
+        try {
+            await webpush.sendNotification(row.subscription, payload);
+        } catch (error) {
+            if (error.statusCode === 404 || error.statusCode === 410) {
+                await pool.query('DELETE FROM push_subscriptions WHERE endpoint = $1', [row.endpoint]);
+            } else {
+                console.warn(`Push delivery failed for ${row.discord_id}:`, error.message);
+            }
+        }
+    }));
+};
+
+let previousCreatorLiveState = new Map();
+let creatorMonitorStarted = false;
+
+const monitorCreatorStreams = async () => {
+    try {
+        const creators = await getContentCreators();
+        if (!Array.isArray(creators)) return;
+
+        for (const creator of creators) {
+            const wasLive = previousCreatorLiveState.get(creator.id);
+            if (wasLive === false && creator.isLive === true) {
+                await sendCreatorPush(creator);
+            }
+            previousCreatorLiveState.set(creator.id, creator.isLive);
+        }
+
+        const activeIds = new Set(creators.map((creator) => creator.id));
+        previousCreatorLiveState = new Map(
+            [...previousCreatorLiveState].filter(([id]) => activeIds.has(id))
+        );
+    } catch (error) {
+        console.warn('Creator live monitor failed:', error.message);
+    }
+};
+
+const startCreatorMonitor = () => {
+    if (creatorMonitorStarted) return;
+    creatorMonitorStarted = true;
+    monitorCreatorStreams();
+    setInterval(monitorCreatorStreams, 30_000);
 };
 
 const createSession = async (user, hasSurvivorsRole = false) => {
@@ -775,6 +874,56 @@ response.end();
     }
 
     // ============================================
+    // WEB PUSH NOTIFICATIONS
+    // ============================================
+
+    if (requestUrl.pathname === '/api/push/config' && request.method === 'GET') {
+        sendJson(response, 200, { enabled: pushEnabled, publicKey: pushEnabled ? vapidPublicKey : null });
+        return;
+    }
+
+    if (requestUrl.pathname === '/api/push/subscribe' && request.method === 'POST') {
+        try {
+            const session = await getAuthenticatedSession(request);
+            if (!session) {
+                sendJson(response, 401, { error: 'Discord login required.' });
+                return;
+            }
+
+            const body = await readJsonBody(request);
+            if (!body.endpoint || !body.keys?.p256dh || !body.keys?.auth) {
+                sendJson(response, 400, { error: 'Invalid push subscription.' });
+                return;
+            }
+
+            await savePushSubscription(session.discord_id, body);
+            sendJson(response, 201, { success: true });
+        } catch (error) {
+            console.error('Push subscription error:', error);
+            sendJson(response, 400, { error: 'Could not save push subscription.' });
+        }
+        return;
+    }
+
+    if (requestUrl.pathname === '/api/push/unsubscribe' && request.method === 'POST') {
+        try {
+            const session = await getAuthenticatedSession(request);
+            if (!session) {
+                sendJson(response, 401, { error: 'Discord login required.' });
+                return;
+            }
+
+            const body = await readJsonBody(request);
+            if (body.endpoint) await removePushSubscription(session.discord_id, body.endpoint);
+            sendJson(response, 200, { success: true });
+        } catch (error) {
+            console.error('Push unsubscribe error:', error);
+            sendJson(response, 400, { error: 'Could not remove push subscription.' });
+        }
+        return;
+    }
+
+    // ============================================
     // STAFF DIRECTORY
     // ============================================
 
@@ -856,6 +1005,15 @@ const initializeDatabase = async () => {
     `);
 
     await pool.query(`
+        CREATE TABLE IF NOT EXISTS push_subscriptions (
+            endpoint TEXT PRIMARY KEY,
+            discord_id TEXT NOT NULL,
+            subscription JSONB NOT NULL,
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+    `);
+
+    await pool.query(`
         DELETE FROM discord_sessions
         WHERE expires_at <= NOW()
     `);
@@ -882,6 +1040,8 @@ const startServer = async () => {
                 console.log(
                     `Redirect URI: ${redirectUri}`
                 );
+
+                startCreatorMonitor();
             }
         );
 
