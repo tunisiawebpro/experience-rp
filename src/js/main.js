@@ -444,6 +444,7 @@ const discordAccountMenu = document.getElementById('discordAccountMenu');
 const discordSignOut = document.getElementById('discordSignOut');
 const pushNotificationsBtn = document.getElementById('pushNotificationsBtn');
 const pushTestBtn = document.getElementById('pushTestBtn');
+const siteToastTestBtn = document.getElementById('siteToastTestBtn');
 const pushNotificationsStatus = document.getElementById('pushNotificationsStatus');
 const serverConnectBtn = document.getElementById('serverConnectBtn');
 const serverAccessNotice = document.getElementById('serverAccessNotice');
@@ -570,6 +571,16 @@ pushTestBtn?.addEventListener('click', async () => {
     } finally {
         pushTestBtn.disabled = false;
     }
+});
+
+siteToastTestBtn?.addEventListener('click', () => {
+    showCreatorLiveToast({
+        id: 'site-toast-test',
+        name: 'Experience RP',
+        avatar: '/images/logoex.png',
+        platform: 'Creator Network',
+        url: '#'
+    });
 });
 
 const staffDirectory = document.querySelector('[data-staff-directory]');

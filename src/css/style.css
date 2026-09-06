@@ -845,6 +845,8 @@
 .discord-account-menu #pushNotificationsBtn i { color: #ffd700; }
 .discord-account-menu #pushTestBtn:hover { background: rgba(74, 222, 128, 0.12); color: #86efac; }
 .discord-account-menu #pushTestBtn i { color: #86efac; }
+.discord-account-menu #siteToastTestBtn:hover { background: rgba(232, 121, 249, 0.12); color: #e879f9; }
+.discord-account-menu #siteToastTestBtn i { color: #e879f9; }
 .push-notifications-status { min-height: 0.8rem; padding: 0 0.7rem 0.35rem; color: #737780; font-size: 0.58rem; line-height: 1.4; }
 .push-notifications-status.is-error { color: #fca5a5; }
 
