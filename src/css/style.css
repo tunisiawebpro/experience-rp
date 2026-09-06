@@ -658,7 +658,8 @@
         text-transform: uppercase;
     }
 
-    .creator-live span { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #e879f9; box-shadow: 0 0 0 4px rgba(232, 121, 249, 0.1), 0 0 1rem rgba(232, 121, 249, 0.8); }
+    .creator-live > span:first-child { width: 0.5rem; height: 0.5rem; flex: 0 0 0.5rem; border-radius: 50%; background: #e879f9; box-shadow: 0 0 0 4px rgba(232, 121, 249, 0.1), 0 0 1rem rgba(232, 121, 249, 0.8); }
+    .creator-live [data-creator-live-label] { width: auto; height: auto; color: #9ca3af; }
 
     .creator-hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(17rem, 0.5fr); gap: 1.5rem; }
 
