@@ -30,6 +30,10 @@ const contentCreatorRoleIds = (process.env.DISCORD_CONTENT_CREATOR_ROLE_ID || pr
     .map((roleId) => roleId.trim())
     .filter(Boolean);
 const contentCreatorRoleName = (process.env.DISCORD_CONTENT_CREATOR_ROLE_NAME || 'Content Creator').trim().toLowerCase();
+const excludedCreatorIds = new Set([
+    '691943511674585160',
+    ...(process.env.DISCORD_EXCLUDED_CREATOR_IDS || '').split(',').map((id) => id.trim()).filter(Boolean)
+]);
 const defaultCreatorProfiles = {
     '190563870635589632': { platform: 'Kick', url: 'https://kick.com/axelsharky', slug: 'axelsharky' },
     '252434851209150464': { platform: 'Kick', url: 'https://kick.com/element_tn', slug: 'element_tn' },
@@ -304,6 +308,7 @@ const getContentCreators = async () => {
     const creators = members.map((member) => {
         const role = creatorRoles.find((creatorRole) => member.roles.includes(creatorRole.id));
         if (!role || !member.user) return null;
+        if (excludedCreatorIds.has(member.user.id)) return null;
 
         const user = member.user;
         const profile = getCreatorProfile(member, role);
