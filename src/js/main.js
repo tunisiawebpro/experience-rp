@@ -555,6 +555,7 @@ pushNotificationsBtn?.addEventListener('click', () => registerPushNotifications(
 
 const staffDirectory = document.querySelector('[data-staff-directory]');
 const staffRoleOrder = [
+    'moderator',
     'founder',
     'co-founder',
     'supervisor',
